@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laravel 团队技术提升体系 | 高级开发工程师</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        
+        .timeline-dot::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .timeline-line::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        
+        .glow-effect {
+            box-shadow: 0 0 60px rgba(102, 126, 234, 0.3);
+        }
+        
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(102, 126, 234, 0.5), transparent);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+        
+        .magnetic {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .magnetic:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="bg-[#0f0f1a] text-white min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-card !bg-opacity-80 !rounded-none !border-0 border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <i class="fas fa-gem text-white text-lg"></i>
+                    </div>
+                    <span class="font-bold text-xl gradient-text">Laravel 卓越体系</span>
+                </div>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#overview" class="nav-link text-gray-300 hover:text-white">概览</a>
+                    <a href="#features" class="nav-link text-gray-300 hover:text-white">特性</a>
+                    <a href="#roadmap" class="nav-link text-gray-300 hover:text-white">路线图</a>
+                    <a href="#documents" class="nav-link text-gray-300 hover:text-white">文档</a>
+                    <a href="#getting-started" class="nav-link text-gray-300 hover:text-white">快速开始</a>
+                </div>
+                <button onclick="toggleMobileMenu()" class="md:hidden text-gray-300 hover:text-white">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="hidden md:hidden bg-black/95 border-t border-white/10">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#overview" class="block text-gray-300 hover:text-white">概览</a>
+                <a href="#features" class="block text-gray-300 hover:text-white">特性</a>
+                <a href="#roadmap" class="block text-gray-300 hover:text-white">路线图</a>
+                <a href="#documents" class="block text-gray-300 hover:text-white">文档</a>
+                <a href="#getting-started" class="block text-gray-300 hover:text-white">快速开始</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section id="overview" class="hero-gradient min-h-screen flex items-center justify-center relative overflow-hidden pt-16">
+        <!-- 装饰元素 -->
+        <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 mb-6">
+                <i class="fas fa-rocket text-indigo-400"></i>
+                <span class="text-sm text-gray-300">为 3-5 人 Laravel 团队设计</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6">
+                Laravel 团队<br>
+                <span class="gradient-text">技术卓越体系</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-8">
+                一套完整的 Laravel/PHP 技术升级方案<br>
+                从代码规范到架构设计，从性能优化到测试体系
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="#documents" class="magnetic px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-indigo-500/30 transition-all">
+                    <i class="fas fa-book-open mr-2"></i>浏览文档
+                </a>
+                <a href="#getting-started" class="magnetic px-8 py-4 glass-card rounded-xl font-semibold text-lg">
+                    <i class="fas fa-play mr-2"></i>快速开始
+                </a>
+            </div>
+            
+            <!-- 统计数据 -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+                <div class="glass-card p-6">
+                    <div class="text-3xl font-bold gradient-text mb-2">7-11</div>
+                    <div class="text-sm text-gray-400">周完成升级</div>
+                </div>
+                <div class="glass-card p-6">
+                    <div class="text-3xl font-bold gradient-text mb-2">5</div>
+                    <div class="text-sm text-gray-400">份核心文档</div>
+                </div>
+                <div class="glass-card p-6">
+                    <div class="text-3xl font-bold gradient-text mb-2">80%</div>
+                    <div class="text-sm text-gray-400">测试覆盖率目标</div>
+                </div>
+                <div class="glass-card p-6">
+                    <div class="text-3xl font-bold gradient-text mb-2">100%</div>
+                    <div class="text-sm text-gray-400">即用代码模板</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 特性展示 -->
+    <section id="features" class="py-24 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">核心特性</span>
+                </h2>
+                <p class="text-xl text-gray-400">全方位提升团队技术能力</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-layer-group text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">三层架构</h3>
+                    <p class="text-gray-400 mb-4">Repository + Service + Action 清晰分层，单一职责原则</p>
+                    <div class="flex items-center gap-2 text-indigo-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-code text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">代码规范</h3>
+                    <p class="text-gray-400 mb-4">PSR-12 统一规范，PHPStan 静态分析，零警告级别 9</p>
+                    <div class="flex items-center gap-2 text-pink-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-bug-slash text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">完整测试</h3>
+                    <p class="text-gray-400 mb-4">Pest 测试框架，覆盖率 > 80%，Unit + Feature 双层测试</p>
+                    <div class="flex items-center gap-2 text-emerald-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-bolt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">性能优化</h3>
+                    <p class="text-gray-400 mb-4">消除 N+1 查询，缓存策略，队列异步处理</p>
+                    <div class="flex items-center gap-2 text-amber-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-search text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Code Review</h3>
+                    <p class="text-gray-400 mb-4">完整审查流程，反馈模板，通过标准</p>
+                    <div class="flex items-center gap-2 text-blue-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center mb-6">
+                        <i class="fas fa-copy text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">即用模板</h3>
+                    <p class="text-gray-400 mb-4">Controller、Service、Repository、测试模板</p>
+                    <div class="flex items-center gap-2 text-violet-400">
+                        <span class="text-sm font-medium">详情</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 路线图 -->
+    <section id="roadmap" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent to-black/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">升级路线图</span>
+                </h2>
+                <p class="text-xl text-gray-400">四个阶段，7-11 周完成全面升级</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto space-y-12">
+                <div class="relative pl-12 timeline-line pb-12">
+                    <div class="timeline-dot"></div>
+                    <div class="glass-card p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold">1</span>
+                            <div>
+                                <h3 class="text-2xl font-bold">代码质量基础</h3>
+                                <span class="text-gray-400 text-sm">1-2 周</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">建立统一的编码标准，配置开发工具链，引入测试框架</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm">PSR-12 规范</span>
+                            <span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm">PHPStan</span>
+                            <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm">Pest 测试</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative pl-12 timeline-line pb-12">
+                    <div class="timeline-dot"></div>
+                    <div class="glass-card p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center font-bold">2</span>
+                            <div>
+                                <h3 class="text-2xl font-bold">架构设计升级</h3>
+                                <span class="text-gray-400 text-sm">2-3 周</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">重构现有代码，引入 Repository、Service、Action 模式，建立清晰的职责划分</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-sm">三层架构</span>
+                            <span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-sm">单一职责</span>
+                            <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-sm">依赖注入</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative pl-12 timeline-line pb-12">
+                    <div class="timeline-dot"></div>
+                    <div class="glass-card p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold">3</span>
+                            <div>
+                                <h3 class="text-2xl font-bold">性能优化与高可用</h3>
+                                <span class="text-gray-400 text-sm">2-3 周</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">识别并消除性能瓶颈，建立缓存策略，实现异步处理</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-sm">N+1 查询优化</span>
+                            <span class="px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-sm">缓存策略</span>
+                            <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-300 text-sm">队列任务</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative pl-12">
+                    <div class="timeline-dot"></div>
+                    <div class="glass-card p-8">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold">4</span>
+                            <div>
+                                <h3 class="text-2xl font-bold">测试体系完善</h3>
+                                <span class="text-gray-400 text-sm">2-3 周</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 mb-4">提高测试覆盖率，建立 CI/CD 流水线，实现自动化质量检测</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm">覆盖率 > 80%</span>
+                            <span class="px-3 py-1 rounded-full bg-orange-500/20 text-orange-300 text-sm">CI/CD</span>
+                            <span class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-sm">自动化测试</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 文档列表 -->
+    <section id="documents" class="py-24 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">核心文档</span>
+                </h2>
+                <p class="text-xl text-gray-400">完整的技术指南和代码模板</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass-card p-8 glow-effect">
+                    <div class="flex items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-book-open text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">技术提升路线图</h3>
+                            <p class="text-gray-400 mb-4">四阶段完整升级计划，包含具体实施步骤和代码示例</p>
+                            <div class="flex items-center gap-4 text-sm text-gray-300">
+                                <span><i class="fas fa-clock mr-1"></i>7-11 周</span>
+                                <span><i class="fas fa-file-alt mr-1"></i>详细规划</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="flex items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-code-branch text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Code Review 指南</h3>
+                            <p class="text-gray-400 mb-4">完整的代码审查流程，常见问题反馈模板，通过标准</p>
+                            <div class="flex items-center gap-4 text-sm text-gray-300">
+                                <span><i class="fas fa-check-circle mr-1"></i>质量把控</span>
+                                <span><i class="fas fa-comments mr-1"></i>反馈模板</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="flex items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-folder-tree text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">项目规范与目录结构</h3>
+                            <p class="text-gray-400 mb-4">标准化目录结构，命名规范，编码风格，代码检查清单</p>
+                            <div class="flex items-center gap-4 text-sm text-gray-300">
+                                <span><i class="fas fa-sitemap mr-1"></i>目录结构</span>
+                                <span><i class="fas fa-ruler mr-1"></i>PSR-12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8">
+                    <div class="flex items-start gap-6">
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-copy text-white text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">Laravel 代码模板库</h3>
+                            <p class="text-gray-400 mb-4">即用代码模板，Controller、Service、Repository、测试模板</p>
+                            <div class="flex items-center gap-4 text-sm text-gray-300">
+                                <span><i class="fas fa-bolt mr-1"></i>即复制即用</span>
+                                <span><i class="fas fa-check mr-1"></i>最佳实践</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 快速开始 -->
+    <section id="getting-started" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent to-black/30">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">快速开始</span>
+                </h2>
+                <p class="text-xl text-gray-400">5 分钟上手，立即开始升级</p>
+            </div>
+            
+            <div class="max-w-4xl mx-auto">
+                <div class="space-y-6">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-sm">1</span>
+                            <h3 class="text-xl font-bold">下载或克隆文档</h3>
+                        </div>
+                        <div class="code-block p-4">
+                            <code class="text-sm text-gray-300">cd your-laravel-project<br>git clone <repository> .workbuddy/docs</code>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center font-bold text-sm">2</span>
+                            <h3 class="text-xl font-bold">阅读技术提升路线图</h3>
+                        </div>
+                        <div class="code-block p-4">
+                            <code class="text-sm text-gray-300">cat "01-技术提升路线图.md"</code>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-sm">3</span>
+                            <h3 class="text-xl font-bold">配置开发工具</h3>
+                        </div>
+                        <div class="code-block p-4">
+                            <code class="text-sm text-gray-300">composer require --dev \<br>  laravel/pint \<br>  phpstan/phpstan \<br>  phpstan/phpstan-laravel \<br>  pestphp/pest</code>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center font-bold text-sm">4</span>
+                            <h3 class="text-xl font-bold">开始第一次代码审查</h3>
+                        </div>
+                        <p class="text-gray-300">使用 Code Review 指南，建立每周审查习惯</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 预期成果 -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                    <span class="gradient-text">预期成果</span>
+                </h2>
+                <p class="text-xl text-gray-400">显著的质量提升和效率改进</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="glass-card p-8 text-center">
+                    <div class="text-5xl font-bold gradient-text mb-4">85%+</div>
+                    <div class="text-gray-400">测试覆盖率</div>
+                    <div class="text-sm text-gray-500 mt-2">20% → 85%+</div>
+                </div>
+                
+                <div class="glass-card p-8 text-center">
+                    <div class="text-5xl font-bold gradient-text mb-4">80%</div>
+                    <div class="text-gray-400">Bug 减少</div>
+                    <div class="text-sm text-gray-500 mt-2">每周 15 → 3 个</div>
+                </div>
+                
+                <div class="glass-card p-8 text-center">
+                    <div class="text-5xl font-bold gradient-text mb-4">90%</div>
+                    <div class="text-gray-400">性能提升</div>
+                    <div class="text-sm text-gray-500 mt-2">500ms → 50ms</div>
+                </div>
+                
+                <div class="glass-card p-8 text-center">
+                    <div class="text-5xl font-bold gradient-text mb-4">24h</div>
+                    <div class="text-gray-400">PR 审查时间</div>
+                    <div class="text-sm text-gray-500 mt-2">3 天 → 24 小时</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-gem text-white text-lg"></i>
+                </div>
+                <span class="font-bold text-xl gradient-text">Laravel 卓越体系</span>
+            </div>
+            <p class="text-gray-400 mb-6">为 Laravel 团队提供全方位技术提升方案</p>
+            <div class="flex items-center justify-center gap-6 text-gray-400">
+                <span><i class="fas fa-users mr-2"></i>3-5 人团队</span>
+                <span><i class="fas fa-calendar mr-2"></i>7-11 周完成</span>
+                <span><i class="fas fa-star mr-2"></i>持续改进</span>
+            </div>
+            <div class="mt-8 pt-8 border-t border-white/10 text-sm text-gray-500">
+                <p>© 2026 Laravel 技术卓越体系. 💎 为团队成长而设计.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    // 关闭移动端菜单
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                }
+            });
+        });
+
+        // 导航栏背景滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-black/80');
+            } else {
+                nav.classList.remove('bg-black/80');
+            }
+        });
+
+        // 磁性效果
+        document.querySelectorAll('.magnetic').forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                card.style.transform = `translate(${x * 0.05}px, ${y * 0.05}px) scale(1.05)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = 'translate(0, 0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
