@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest 测试框架 — Laravel 卓越体系</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        p code, li code, td code { font-family: var(--font-mono); font-size: 0.85em; background: rgba(102, 126, 234, 0.15); color: #a5b4fc; padding: 0.15rem 0.45rem; border-radius: 6px; border: 1px solid rgba(102, 126, 234, 0.2); }
+        .content p, .content li, .content td { line-height: 1.85; }
+        .content ul, .content ol { padding-left: 1.5rem; margin: 0.75rem 0; }
+        .content ul { list-style: disc; }
+        .content ol { list-style: decimal; }
+        .content li { margin-bottom: 0.35rem; color: var(--text-secondary); }
+        .content p { color: var(--text-secondary); margin-bottom: 0.85rem; }
+        .dual-code { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+        .dual-code > div { position: relative; }
+        .dual-code .good-label { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 6px; z-index: 2; }
+        .dual-code .good-label.green { background: rgba(16,185,129,0.2); color: #34d399; }
+        .dual-code .good-label.red { background: rgba(239,68,68,0.2); color: #f87171; }
+        @media (max-width: 768px) { .dual-code { grid-template-columns: 1fr; } }
+        .toc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+        .toc-box ol { list-style: decimal; padding-left: 1.5rem; }
+        .toc-box li { margin-bottom: 0.5rem; }
+        .toc-box a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .toc-box a:hover { color: #a5b4fc; }
+        .compare-card { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+        .compare-card h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+        @media (max-width: 768px) { .compare-grid { grid-template-columns: 1fr; } }
+        .compare-grid .col { border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border-glass); }
+        .compare-grid .col h5 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .pitfall-card { display: grid; grid-template-columns: auto 1fr; gap: 1rem; padding: 1.25rem 1.5rem; background: rgba(239,68,68,0.04); border: 1px solid rgba(239,68,68,0.15); border-radius: 16px; margin-bottom: 1rem; }
+        .pitfall-card .pitfall-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; background: rgba(239,68,68,0.15); color: #f87171; flex-shrink: 0; margin-top: 0.1rem; }
+        .pitfall-card h5 { font-size: 0.9rem; font-weight: 600; color: #fca5a5; margin-bottom: 0.3rem; }
+        .pitfall-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+        .pitfall-card code { font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-brand">
+                <div class="brand-icon"><i class="fas fa-gem text-white text-sm"></i></div>
+                <span>Laravel 卓越体系</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#roadmap">路线图</a></li>
+                <li><a href="../index.html#phases" class="active">知识库</a></li>
+                <li><a href="../index.html#getting-started">快速开始</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="phase-divider">
+                <span class="phase-num" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff">1</span>
+                <span class="phase-label">代码质量基础</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4>主题</h4>
+            <ul class="sidebar-nav">
+                <li><a href="psr12-code-standards.html">
+                    <span class="nav-icon"><i class="fas fa-code"></i></span>PSR-12 代码规范
+                    <span class="nav-badge done">完成</span>
+                </a></li>
+                <li><a href="dev-toolchain.html">
+                    <span class="nav-icon"><i class="fas fa-microscope"></i></span>静态分析与工具链
+                    <span class="nav-badge done">完成</span>
+                </a></li>
+                <li><a href="pest-testing.html" class="active">
+                    <span class="nav-icon"><i class="fas fa-flask-vial"></i></span>Pest 测试框架
+                    <span class="nav-badge current">当前</span>
+                </a></li>
+                <li><a href="git-workflow.html">
+                    <span class="nav-icon"><i class="fab fa-git-alt"></i></span>Git 工作流
+                    <span class="nav-badge upcoming">下一</span>
+                </a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">2</span>
+                <span class="phase-label">架构设计升级</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-layer-group"></i></span>三层架构</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-diagram-project"></i></span>依赖注入</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">3</span>
+                <span class="phase-label">性能优化</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-database"></i></span>N+1 查询</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-bolt"></i></span>缓存策略</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">4</span>
+                <span class="phase-label">测试体系</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-vial"></i></span>CI/CD</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-chart-line"></i></span>覆盖率</a></li>
+            </ul>
+        </aside>
+
+        <!-- 正文 -->
+        <main class="content">
+            <!-- 文章头部 -->
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../index.html">首页</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <a href="../index.html#phases">第一阶段：代码质量基础</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <span>Pest 测试框架</span>
+                </div>
+                <h1>Pest 测试框架</h1>
+                <p class="page-desc">用最优雅的语法写出最可靠的测试——从安装配置到高阶用法，全面掌握 Pest 2.x，让测试成为日常开发的自然部分。</p>
+                <div class="page-meta">
+                    <span><i class="far fa-clock"></i> 阅读约 30 分钟</span>
+                    <span><i class="far fa-bookmark"></i> 第一阶段 · 主题 3/4</span>
+                    <span class="tag tag-indigo">测试</span>
+                </div>
+            </div>
+
+            <!-- 目录 -->
+            <div class="toc-box">
+                <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.75rem"><i class="fas fa-list-ul" style="color:#a5b4fc;margin-right:0.5rem"></i>本文目录</h3>
+                <ol>
+                    <li><a href="#why-pest">为什么选择 Pest</a></li>
+                    <li><a href="#install">安装与配置</a></li>
+                    <li><a href="#basics">核心语法速览</a></li>
+                    <li><a href="#expectations">断言系统（Expectation API）</a></li>
+                    <li><a href="#laravel-testing">Laravel 测试集成</a></li>
+                    <li><a href="#database">数据库测试</a></li>
+                    <li><a href="#http">HTTP 测试实战</a></li>
+                    <li><a href="#organization">测试文件组织</a></li>
+                    <li><a href="#coverage">覆盖率与 CI</a></li>
+                    <li><a href="#best-practices">测试最佳实践</a></li>
+                    <li><a href="#pitfalls">常见陷阱与避坑指南</a></li>
+                </ol>
+            </div>
+
+            <!-- ====== Section 1 ====== -->
+            <h2 class="section-title" id="why-pest">为什么选择 Pest</h2>
+            <p>PHPUnit 是 PHP 测试的基石，但它的语法冗长，大量样板代码淹没了测试意图。Pest 建立在 PHPUnit 之上，用<strong style="color:#e0e7ff">极简语法</strong>重新定义了 PHP 测试体验。</p>
+
+            <div class="compare-grid">
+                <div class="col" style="background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.15)">
+                    <h5 style="color:#fca5a5"><i class="fas fa-xmark" style="margin-right:0.4rem"></i>PHPUnit</h5>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">class</span> <span style="color:#67e8f9">OrderTest</span> <span style="color:#c084fc">extends</span> TestCase
+{
+    <span style="color:#c084fc">public function</span> <span style="color:#67e8f9">test_order_total_is_calculated</span>()
+    {
+        $order = <span style="color:#67e8f9">Order</span>::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>();
+        $total = $order-><span style="color:#67e8f9">calculateTotal</span>();
+
+        $this-><span style="color:#67e8f9">assertEquals</span>(100, $total);
+    }
+}</code></div>
+                </div>
+                <div class="col" style="background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)">
+                    <h5 style="color:#6ee7b7"><i class="fas fa-check" style="margin-right:0.4rem"></i>Pest</h5>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">it</span>(<span style="color:#34d399">'calculates order total'</span>, <span style="color:#c084fc">function</span> () {
+    $order = <span style="color:#67e8f9">Order</span>::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>();
+    <span style="color:#67e8f9">expect</span>($order-><span style="color:#67e8f9">calculateTotal</span>())-><span style="color:#67e8f9">toBe</span>(100);
+});</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">Pest 的核心优势</h3>
+            <table class="comparison-table">
+                <thead><tr><th>优势</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td><strong style="color:#e0e7ff">零样板代码</strong></td><td>无需 class、无需 extends TestCase、无需 test_ 前缀</td></tr>
+                    <tr><td><strong style="color:#e0e7ff">可读性</strong></td><td>测试名就是一句话，描述业务场景而非技术细节</td></tr>
+                    <tr><td><strong style="color:#e0e7ff">链式断言</strong></td><td><code>expect($value)->toBe()->toBeArray()->toHaveCount()</code> 自然流畅</td></tr>
+                    <tr><td><strong style="color:#e0e7ff">兼容 PHPUnit</strong></td><td>100% 兼容 PHPUnit，现有测试无需重写可共存</td></tr>
+                    <tr><td><strong style="color:#e0e7ff">插件生态</strong></td><td>Laravel、Livewire、Sanctum 等官方插件开箱即用</td></tr>
+                    <tr><td><strong style="color:#e0e7ff">并行测试</strong></td><td>内置 <code>--parallel</code> 支持，测试速度成倍提升</td></tr>
+                </tbody>
+            </table>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> 兼容性保证</div>
+                <p>Pest 是 PHPUnit 的封装层（wrapper），不是替代品。你可以在同一个项目中同时使用 Pest 和 PHPUnit，逐步迁移，无需一次性重写所有测试。</p>
+            </div>
+
+            <!-- ====== Section 2 ====== -->
+            <h2 class="section-title" id="install">安装与配置</h2>
+
+            <h3 class="subsection-title">2.1 安装</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># Laravel 项目中安装 Pest</span>
+composer require --dev pestphp/pest pestphp/pest-plugin-laravel
+
+<span style="color:#6b7280"># 初始化测试配置（创建 Pest.php）</span>
+php artisan pest:install</code></div>
+
+            <h3 class="subsection-title">2.2 目录结构</h3>
+            <p>安装后，测试目录遵循 Laravel 约定：</p>
+            <div class="code-block p-4"><span class="code-label">测试目录</span><code>tests/
+├── Feature/           <span style="color:#6b7280"># 功能测试（HTTP 请求、业务流程）</span>
+│   ├── <span style="color:#34d399">OrderTest.php</span>    <span style="color:#6b7280"># 也可以用 .test.php 后缀</span>
+│   └── <span style="color:#34d399">AuthTest.php</span>
+├── Unit/              <span style="color:#6b7280"># 单元测试（纯逻辑、Service）</span>
+│   └── <span style="color:#34d399">CalculatorTest.php</span>
+├── Arch/              <span style="color:#6b7280"># 架构测试（依赖关系、分层）</span>
+│   └── <span style="color:#34d399">ArchTest.php</span>
+├── <span style="color:#34d399">Pest.php</span>          <span style="color:#6b7280"># 全局配置文件</span>
+└── <span style="color:#34d399">TestCase.php</span>      <span style="color:#6b7280"># 基础测试用例（Laravel 自动生成）</span></code></div>
+
+            <h3 class="subsection-title">2.3 全局配置 — Pest.php</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Pest.php</span><code><span style="color:#c084fc">uses</span>(Tests\TestCase::<span style="color:#c084fc">class</span>)-><span style="color:#67e8f9">in</span>(<span style="color:#34d399">'Feature'</span>);
+<span style="color:#c084fc">uses</span>(Tests\TestCase::<span style="color:#c084fc">class</span>)-><span style="color:#67e8f9">in</span>(<span style="color:#34d399">'Unit'</span>);
+
+<span style="color:#6b7280">/*──────────────────────────────────────────
+ │  全局 beforeEach / afterEach
+ │  每个测试用例执行前/后自动调用
+ ──────────────────────────────────────────*/</span>
+
+<span style="color:#67e8f9">beforeEach</span>(<span style="color:#c084fc">function</span> () {
+    <span style="color:#6b7280">// 可选：每个测试前清理</span>
+});
+
+<span style="color:#67e8f9">afterEach</span>(<span style="color:#c084fc">function</span> () {
+    <span style="color:#6b7280">// 可选：每个测试后清理</span>
+});
+
+<span style="color:#6b7280">/*──────────────────────────────────────────
+ │  全局 Macro — 扩展 Expectation API
+ │  在任何测试文件中使用 expect()->toBeJson()
+ ──────────────────────────────────────────*/</span>
+
+<span style="color:#67e8f9">expect</span>()-><span style="color:#67e8f9">extend</span>(<span style="color:#34d399">'toBeJson'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#c084fc">return</span> $this-><span style="color:#67e8f9">toMatchJson</span>(json_encode(
+        json_decode($this->value, <span style="color:#c084fc">true</span>)
+    ));
+});</code></div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> 关于测试文件后缀</div>
+                <p>Pest 支持两种后缀：<code>SomethingTest.php</code>（类风格）和 <code>something.test.php</code>（文件风格）。团队统一使用 <code>*Test.php</code>，与 Laravel 约定保持一致。</p>
+            </div>
+
+            <!-- ====== Section 3 ====== -->
+            <h2 class="section-title" id="basics">核心语法速览</h2>
+
+            <h3 class="subsection-title">3.1 基本测试结构</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/BasicTest.php</span><code><span style="color:#c084fc">it</span>(<span style="color:#34d399">'can add two numbers'</span>, <span style="color:#c084fc">function</span> () {
+    $result = <span style="color:#67e8f9">add</span>(2, 3);
+
+    <span style="color:#67e8f9">expect</span>($result)-><span style="color:#67e8f9">toBe</span>(5);
+});
+
+<span style="color:#67e8f9">test</span>(<span style="color:#34d399">'subtraction works correctly'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">subtract</span>(10, 4))-><span style="color:#67e8f9">toBe</span>(6);
+});
+
+<span style="color:#c084fc">it</span>(<span style="color:#34d399">'throws exception for division by zero'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">fn</span> () => <span style="color:#67e8f9">divide</span>(1, 0))
+        -><span style="color:#67e8f9">toThrow</span>(InvalidArgumentException::<span style="color:#c084fc">class</span>);
+});</code></div>
+
+            <h3 class="subsection-title">3.2 数据提供者（Datasets）</h3>
+            <p>Pest 用 <code>with()</code> 替代 PHPUnit 的 <code>@dataProvider</code>，一个测试覆盖多种场景：</p>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/ValidationTest.php</span><code><span style="color:#67e8f9">it</span>(<span style="color:#34d399">'validates email format'</span>)
+    -><span style="color:#67e8f9">with</span>([
+        <span style="color:#34d399">'user@example.com'</span>,
+        <span style="color:#34d399">'test+tag@domain.org'</span>,
+        <span style="color:#34d399">'name.surname@co.uk'</span>,
+    ])
+    -><span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">function</span> (<span style="color:#a78bafa">string</span> $email) {
+        <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">isValidEmail</span>($email))-><span style="color:#67e8f9">toBeTrue</span>();
+    });
+
+<span style="color:#6b7280">// 带命名的数据集</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'rejects invalid emails'</span>)
+    -><span style="color:#67e8f9">with</span>([
+        <span style="color:#34d399">'missing-at'   </span> => <span style="color:#34d399">'userexample.com'</span>,
+        <span style="color:#34d399">'missing-domain'</span> => <span style="color:#34d399">'user@'</span>,
+        <span style="color:#34d399">'has-space'     </span> => <span style="color:#34d399">'user @example.com'</span>,
+        <span style="color:#34d399">'empty'        </span> => <span style="color:#34d399">''</span>,
+    ])
+    -><span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">function</span> (<span style="color:#a78bafa">string</span> $email) {
+        <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">isValidEmail</span>($email))-><span style="color:#67e8f9">toBeFalse</span>();
+    });</code></div>
+
+            <h3 class="subsection-title">3.3 测试生命周期钩子</h3>
+            <table class="comparison-table">
+                <thead><tr><th>钩子</th><th>执行时机</th><th>用途</th></tr></thead>
+                <tbody>
+                    <tr><td><code>beforeEach()</code></td><td>每个测试前</td><td>创建通用数据、设置状态</td></tr>
+                    <tr><td><code>afterEach()</code></td><td>每个测试后</td><td>清理、重置状态</td></tr>
+                    <tr><td><code>beforeAll()</code></td><td>文件内所有测试前（一次）</td><td>耗时初始化（如创建文件）</td></tr>
+                    <tr><td><code>afterAll()</code></td><td>文件内所有测试后（一次）</td><td>全局清理</td></tr>
+                </tbody>
+            </table>
+
+            <div class="code-block p-4"><span class="code-label">tests/Feature/OrderTest.php</span><code><span style="color:#c084fc">use</span> App\Models\User;
+<span style="color:#c084fc">use</span> App\Models\Order;
+
+<span style="color:#67e8f9">beforeEach</span>(<span style="color:#c084fc">function</span> () {
+    $this->user = User::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>([
+        <span style="color:#34d399">'role'</span> => <span style="color:#34d399">'admin'</span>,
+    ]);
+});
+
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'admin can create order'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#6b7280">// $this->user 已自动可用</span>
+    $response = $this-><span style="color:#67e8f9">actingAs</span>($this->user)
+        -><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/orders'</span>, [
+            <span style="color:#34d399">'product_id'</span> => 1,
+            <span style="color:#34d399">'quantity'</span>   => 3,
+        ]);
+
+    $response-><span style="color:#67e8f9">assertCreated</span>();
+});</code></div>
+
+            <h3 class="subsection-title">3.4 跳过与标记测试</h3>
+            <div class="code-block p-4"><span class="code-label">跳过与分组</span><code><span style="color:#67e8f9">it</span>(<span style="color:#34d399">'pending feature - payment integration'</span>)
+    -><span style="color:#67e8f9">skip</span>(<span style="color:#34d399">'Waiting for payment gateway API'</span>)
+    -><span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">function</span> () {
+        <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">processPayment</span>(100))-><span style="color:#67e8f9">toBeTrue</span>();
+    });
+
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'runs only in CI'</span>)
+    -><span style="color:#67e8f9">skipUnless</span>(env(<span style="color:#34d399">'CI'</span>) === <span style="color:#34d399">'true'</span>)
+    -><span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">function</span> () {
+        <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">deployed</span>())-><span style="color:#67e8f9">toBeTrue</span>();
+    });
+
+<span style="color:#6b7280">// 按标记运行</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'slow integration test'</span>)
+    -><span style="color:#67e8f9">group</span>(<span style="color:#34d399">'slow'</span>)
+    -><span style="color:#67e8f9">expect</span>(<span style="color:#c084fc">function</span> () {
+        <span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">runFullImport</span>())-><span style="color:#67e8f9">toBeTrue</span>();
+    });</code></div>
+
+            <!-- ====== Section 4 ====== -->
+            <h2 class="section-title" id="expectations">断言系统（Expectation API）</h2>
+            <p>Pest 的 <code>expect()</code> 是链式断言 API，替代 PHPUnit 的 <code>$this->assertEquals()</code> 等方法。以下是团队常用的断言清单：</p>
+
+            <h3 class="subsection-title">4.1 常用断言速查</h3>
+            <table class="comparison-table">
+                <thead><tr><th>类别</th><th>断言</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td rowspan="4"><strong style="color:#e0e7ff">比较</strong></td><td><code>toBe($value)</code></td><td>严格相等（===）</td></tr>
+                    <tr><td><code>toBeTrue() / toBeFalse()</code></td><td>布尔断言</td></tr>
+                    <tr><td><code>toBeNull()</code></td><td>必须为 null</td></tr>
+                    <tr><td><code>toBeGreaterThan($n)</code></td><td>大于</td></tr>
+                    <tr><td rowspan="4"><strong style="color:#e0e7ff">类型</strong></td><td><code>toBeArray()</code></td><td>必须是数组</td></tr>
+                    <tr><td><code>toBeString()</code></td><td>必须是字符串</td></tr>
+                    <tr><td><code>toBeInt()</code></td><td>必须是整数</td></tr>
+                    <tr><td><code>toBeInstanceOf($class)</code></td><td>类型检查</td></tr>
+                    <tr><td rowspan="4"><strong style="color:#e0e7ff">集合/字符串</strong></td><td><code>toHaveCount($n)</code></td><td>元素数量</td></tr>
+                    <tr><td><code>toContain($value)</code></td><td>包含某个值</td></tr>
+                    <tr><td><code>toHaveKey($key)</code></td><td>数组包含键</td></tr>
+                    <tr><td><code>toBeEmpty()</code></td><td>为空</td></tr>
+                    <tr><td rowspan="3"><strong style="color:#e0e7ff">异常</strong></td><td><code>toThrow($class)</code></td><td>抛出指定异常</td></tr>
+                    <tr><td><code>toThrowMessage($msg)</code></td><td>异常消息匹配</td></tr>
+                    <tr><td><code>not()->toThrow()</code></td><td>不抛异常</td></tr>
+                    <tr><td rowspan="3"><strong style="color:#e0e7ff">链式组合</strong></td><td><code>and($value)</code></td><td>切转到另一个值继续断言</td></tr>
+                    <tr><td><code>not()</code></td><td>取反</td></tr>
+                    <tr><td><code>toBe()</code>（可多次调用）</td><td>连续断言多个值</td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">4.2 链式断言示例</h3>
+            <div class="code-block p-4"><span class="code-label">链式断言</span><code><span style="color:#67e8f9">expect</span>($user)
+    -><span style="color:#67e8f9">toBeInstanceOf</span>(User::<span style="color:#c084fc">class</span>)
+    -><span style="color:#67e8f9">name</span>-><span style="color:#67e8f9">toBe</span>(<span style="color:#34d399">'John'</span>)
+    -><span style="color:#67e8f9">email</span>-><span style="color:#67e8f9">toContain</span>(<span style="color:#34d399">'@'</span>);
+
+<span style="color:#67e8f9">expect</span>($response-><span style="color:#67e8f9">json</span>(<span style="color:#34d399">'data.orders'</span>))
+    -><span style="color:#67e8f9">toBeArray</span>()
+    -><span style="color:#67e8f9">toHaveCount</span>(3)
+    -><span style="color:#67e8f9">each</span>-><span style="color:#67e8f9">toHaveKey</span>(<span style="color:#34d399">'id'</span>);
+
+<span style="color:#67e8f9">expect</span>(<span style="color:#67e8f9">collect</span>($items))
+    -><span style="color:#67e8f9">not</span>()-><span style="color:#67e8f9">toBeEmpty</span>()
+    -><span style="color:#67e8f9">first</span>()-><span style="color:#67e8f9">status</span>-><span style="color:#67e8f9">toBe</span>(<span style="color:#34d399">'active'</span>);</code></div>
+
+            <h3 class="subsection-title">4.3 自定义 Expectation Macro</h3>
+            <p>在 <code>Pest.php</code> 中注册自定义断言，团队共享：</p>
+            <div class="code-block p-4"><span class="code-label">tests/Pest.php</span><code><span style="color:#6b7280">// 自定义：断言金额为正数</span>
+<span style="color:#67e8f9">expect</span>()-><span style="color:#67e8f9">extend</span>(<span style="color:#34d399">'toBePositiveAmount'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#67e8f9">expect</span>($this->value)-><span style="color:#67e8f9">toBeNumeric</span>();
+    <span style="color:#67e8f9">expect</span>($this->value)-><span style="color:#67e8f9">toBeGreaterThan</span>(0);
+
+    <span style="color:#c084fc">return</span> $this;
+});
+
+<span style="color:#6b7280">// 使用</span>
+<span style="color:#67e8f9">expect</span>($order->total)-><span style="color:#67e8f9">toBePositiveAmount</span>();</code></div>
+
+            <!-- ====== Section 5 ====== -->
+            <h2 class="section-title" id="laravel-testing">Laravel 测试集成</h2>
+
+            <h3 class="subsection-title">5.1 测试基础</h3>
+            <p>安装 <code>pestphp/pest-plugin-laravel</code> 后，Pest 自动获得 Laravel 所有测试能力：<code>actingAs()</code>、<code>withoutMiddleware()</code>、<code>seed()</code> 等。</p>
+
+            <h3 class="subsection-title">5.2 使用 Factory</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/UserTest.php</span><code><span style="color:#c084fc">use</span> App\Models\User;
+<span style="color:#c084fc">use</span> App\Models\Team;
+
+<span style="color:#67e8f9">beforeEach</span>(<span style="color:#c084fc">function</span> () {
+    $this->user = User::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">has</span>(
+        Team::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">count</span>(2)
+    )-><span style="color:#67e8f9">create</span>([
+        <span style="color:#34d399">'name' </span> => <span style="color:#34d399">'Alice'</span>,
+        <span style="color:#34d399">'email'</span> => <span style="color:#34d399">'alice@example.com'</span>,
+    ]);
+});
+
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'user belongs to teams'</span>, <span style="color:#c084fc">function</span> () {
+    <span style="color:#67e8f9">expect</span>($this->user->teams)-><span style="color:#67e8f9">toHaveCount</span>(2);
+    <span style="color:#67e8f9">expect</span>($this->user->name)-><span style="color:#67e8f9">toBe</span>(<span style="color:#34d399">'Alice'</span>);
+});</code></div>
+
+            <h3 class="subsection-title">5.3 Mail / Event / Notification Fake</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/RegistrationTest.php</span><code><span style="color:#c084fc">use</span> App\Mail\WelcomeMail;
+<span style="color:#c084fc">use</span> App\Events\UserRegistered;
+<span style="color:#c084fc">use</span> Illuminate\Support\Facades\Mail;
+<span style="color:#c084fc">use</span> Illuminate\Support\Facades\Event;
+
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'sends welcome email after registration'</span>, <span style="color:#c084fc">function</span> () {
+    Mail::<span style="color:#67e8f9">fake</span>();
+    Event::<span style="color:#67e8f9">fake</span>();
+
+    $this-><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/register'</span>, [
+        <span style="color:#34d399">'name'</span>     => <span style="color:#34d399">'Alice'</span>,
+        <span style="color:#34d399">'email'</span>    => <span style="color:#34d399">'alice@example.com'</span>,
+        <span style="color:#34d399">'password'</span> => <span style="color:#34d399">'Password123!'</span>,
+    ])-><span style="color:#67e8f9">assertCreated</span>();
+
+    <span style="color:#6b7280">// 断言邮件被发送</span>
+    Mail::<span style="color:#67e8f9">assertSent</span>(WelcomeMail::<span style="color:#c084fc">class</span>, <span style="color:#c084fc">function</span> ($mail) {
+        <span style="color:#c084fc">return</span> $mail-><span style="color:#67e8f9">hasTo</span>(<span style="color:#34d399">'alice@example.com'</span>);
+    });
+
+    <span style="color:#6b7280">// 断言事件被触发</span>
+    Event::<span style="color:#67e8f9">assertDispatched</span>(UserRegistered::<span style="color:#c084fc">class</span>);
+});</code></div>
+
+            <!-- ====== Section 6 ====== -->
+            <h2 class="section-title" id="database">数据库测试</h2>
+
+            <h3 class="subsection-title">6.1 数据库迁移与事务</h3>
+            <p>Laravel 测试默认在每个测试后<strong style="color:#e0e7ff">自动回滚数据库事务</strong>，无需手动清理。</p>
+
+            <h3 class="subsection-title">6.2 RefreshDatabase Trait</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Pest.php</span><code><span style="color:#c084fc">uses</span>(Illuminate\Foundation\Testing\RefreshDatabase::<span style="color:#c084fc">class</span>)-><span style="color:#67e8f9">in</span>(<span style="color:#34d399">'Feature'</span>);</code></div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> RefreshDatabase vs DatabaseMigrations</div>
+                <p><code>RefreshDatabase</code> 使用事务回滚（快），<code>DatabaseMigrations</code> 每次重新运行迁移（慢）。团队统一使用 <code>RefreshDatabase</code>。</p>
+            </div>
+
+            <h3 class="subsection-title">6.3 数据库断言</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/OrderTest.php</span><code><span style="color:#67e8f9">it</span>(<span style="color:#34d399">'creates order in database'</span>, <span style="color:#c084fc">function</span> () {
+    $this-><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/orders'</span>, [
+        <span style="color:#34d399">'product_id'</span> => 1,
+        <span style="color:#34d399">'quantity'</span>   => 5,
+    ])-><span style="color:#67e8f9">assertCreated</span>();
+
+    <span style="color:#6b7280">// 断言数据库中有这条记录</span>
+    $this-><span style="color:#67e8f9">assertDatabaseHas</span>(<span style="color:#34d399">'orders'</span>, [
+        <span style="color:#34d399">'product_id'</span> => 1,
+        <span style="color:#34d399">'quantity'</span>   => 5,
+        <span style="color:#34d399">'status'</span>     => <span style="color:#34d399">'pending'</span>,
+    ]);
+
+    <span style="color:#6b7280"># 断言不存在</span>
+    $this-><span style="color:#67e8f9">assertDatabaseMissing</span>(<span style="color:#34d399">'orders'</span>, [
+        <span style="color:#34d399">'status'</span> => <span style="color:#34d399">'cancelled'</span>,
+    ]);
+});</code></div>
+
+            <h3 class="subsection-title">6.4 使用 Seed 数据</h3>
+            <div class="code-block p-4"><span class="code-label">Seeding</span><code><span style="color:#6b7280">// 在单个测试中使用 seed</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'shows roles from database'</span>, <span style="color:#c084fc">function</span> () {
+    $this-><span style="color:#67e8f9">seed</span>(RoleSeeder::<span style="color:#c084fc">class</span>);
+
+    $response = $this-><span style="color:#67e8f9">getJson</span>(<span style="color:#34d399">'/api/roles'</span>);
+
+    $response-><span style="color:#67e8f9">assertOk</span>()
+        -><span style="color:#67e8f9">assertJsonCount</span>(3, <span style="color:#34d399">'data'</span>);
+});
+
+<span style="color:#6b7280"># 全局 seed（Pest.php 中）</span>
+<span style="color:#67e8f9">beforeEach</span>(<span style="color:#c084fc">function</span> () {
+    $this-><span style="color:#67e8f9">seed</span>(<span style="color:#34d399">DatabaseSeeder</span>::<span style="color:#c084fc">class</span>);
+});</code></div>
+
+            <!-- ====== Section 7 ====== -->
+            <h2 class="section-title" id="http">HTTP 测试实战</h2>
+            <p>HTTP 测试是 Laravel 测试中最常用的类型，覆盖 API 和 Web 路由。</p>
+
+            <h3 class="subsection-title">7.1 完整的 CRUD 测试模板</h3>
+            <div class="code-block p-4"><span class="code-label">tests/Feature/Api/ProductTest.php</span><code><span style="color:#c084fc">use</span> App\Models\Product;
+<span style="color:#c084fc">use</span> App\Models\User;
+
+<span style="color:#67e8f9">beforeEach</span>(<span style="color:#c084fc">function</span> () {
+    $this->admin = User::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>([<span style="color:#34d399">'role'</span> => <span style="color:#34d399">'admin'</span>]);
+    $this->user  = User::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>([<span style="color:#34d399">'role'</span> => <span style="color:#34d399">'user'</span>]);
+});
+
+<span style="color:#6b7280">// ──── Index ────</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'lists all products'</span>, <span style="color:#c084fc">function</span> () {
+    Product::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">count</span>(3)-><span style="color:#67e8f9">create</span>();
+
+    $this-><span style="color:#67e8f9">actingAs</span>($this->user)
+        -><span style="color:#67e8f9">getJson</span>(<span style="color:#34d399">'/api/products'</span>)
+        -><span style="color:#67e8f9">assertOk</span>()
+        -><span style="color:#67e8f9">assertJsonCount</span>(3, <span style="color:#34d399">'data'</span>)
+        -><span style="color:#67e8f9">assertJsonStructure</span>([
+            <span style="color:#34d399">'data'</span> => [
+                <span style="color:#34d399">'*'</span> => [<span style="color:#34d399">'id'</span>, <span style="color:#34d399">'name'</span>, <span style="color:#34d399">'price'</span>]
+            ]
+        ]);
+});
+
+<span style="color:#6b7280">// ──── Show ────</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'shows a single product'</span>, <span style="color:#c084fc">function</span> () {
+    $product = Product::<span style="color:#67e8f9">factory</span>()-><span style="color:#67e8f9">create</span>();
+
+    $this-><span style="color:#67e8f9">actingAs</span>($this->user)
+        -><span style="color:#67e8f9">getJson</span>(<span style="color:#34d399">"/api/products/{$product->id}"</span>)
+        -><span style="color:#67e8f9">assertOk</span>()
+        -><span style="color:#67e8f9">assertJsonPath</span>(<span style="color:#34d399">'data.name'</span>, $product->name);
+});
+
+<span style="color:#6b7280">// ──── Store ────</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'admin creates a product'</span>, <span style="color:#c084fc">function</span> () {
+    $data = [
+        <span style="color:#34d399">'name'</span>  => <span style="color:#34d399">'Widget'</span>,
+        <span style="color:#34d399">'price'</span> => 2999,
+    ];
+
+    $this-><span style="color:#67e8f9">actingAs</span>($this->admin)
+        -><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/products'</span>, $data)
+        -><span style="color:#67e8f9">assertCreated</span>()
+        -><span style="color:#67e8f9">assertJsonPath</span>(<span style="color:#34d399">'data.name'</span>, <span style="color:#34d399">'Widget'</span>);
+
+    $this-><span style="color:#67e8f9">assertDatabaseHas</span>(<span style="color:#34d399">'products'</span>, $data);
+});
+
+<span style="color:#6b7280">// ──── Authorization ────</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'non-admin cannot create products'</span>, <span style="color:#c084fc">function</span> () {
+    $this-><span style="color:#67e8f9">actingAs</span>($this->user)
+        -><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/products'</span>, [
+            <span style="color:#34d399">'name'</span>  => <span style="color:#34d399">'Widget'</span>,
+            <span style="color:#34d399">'price'</span> => 2999,
+        ])
+        -><span style="color:#67e8f9">assertForbidden</span>();
+});
+
+<span style="color:#6b7280">// ──── Validation ────</span>
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'validates required fields'</span>, <span style="color:#c084fc">function</span> () {
+    $this-><span style="color:#67e8f9">actingAs</span>($this->admin)
+        -><span style="color:#67e8f9">postJson</span>(<span style="color:#34d399">'/api/products'</span>, [])
+        -><span style="color:#67e8f9">assertUnprocessable</span>()
+        -><span style="color:#67e8f9">assertJsonValidationErrors</span>([<span style="color:#34d399">'name'</span>, <span style="color:#34d399">'price'</span>]);
+});</code></div>
+
+            <h3 class="subsection-title">7.2 JSON 响应断言速查</h3>
+            <table class="comparison-table">
+                <thead><tr><th>断言方法</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td><code>assertOk()</code></td><td>HTTP 200</td></tr>
+                    <tr><td><code>assertCreated()</code></td><td>HTTP 201</td></tr>
+                    <tr><td><code>assertNoContent()</code></td><td>HTTP 204</td></tr>
+                    <tr><td><code>assertForbidden()</code></td><td>HTTP 403</td></tr>
+                    <tr><td><code>assertNotFound()</code></td><td>HTTP 404</td></tr>
+                    <tr><td><code>assertUnprocessable()</code></td><td>HTTP 422</td></tr>
+                    <tr><td><code>assertJsonPath('data.id', 5)</code></td><td>精确路径值</td></tr>
+                    <tr><td><code>assertJsonStructure(['data' => ['*id']])</code></td><td>JSON 结构</td></tr>
+                    <tr><td><code>assertJsonCount(3, 'data')</code></td><td>数组元素数量</td></tr>
+                    <tr><td><code>assertJsonValidationErrors(['name'])</code></td><td>验证错误字段</td></tr>
+                </tbody>
+            </table>
+
+            <!-- ====== Section 8 ====== -->
+            <h2 class="section-title" id="organization">测试文件组织</h2>
+
+            <h3 class="subsection-title">8.1 目录结构最佳实践</h3>
+            <div class="code-block p-4"><span class="code-label">推荐目录</span><code>tests/
+├── Feature/
+│   ├── Auth/
+│   │   ├── <span style="color:#34d399">LoginTest.php</span>
+│   │   ├── <span style="color:#34d399">RegisterTest.php</span>
+│   │   └── <span style="color:#34d399">PasswordResetTest.php</span>
+│   ├── Api/
+│   │   ├── <span style="color:#34d399">ProductTest.php</span>
+│   │   ├── <span style="color:#34d399">OrderTest.php</span>
+│   │   └── <span style="color:#34d399">UserTest.php</span>
+│   └── <span style="color:#34d399">HomePageTest.php</span>
+├── Unit/
+│   ├── Services/
+│   │   ├── <span style="color:#34d399">OrderServiceTest.php</span>
+│   │   └── <span style="color:#34d399">PaymentServiceTest.php</span>
+│   └── ValueObjects/
+│       └── <span style="color:#34d399">MoneyTest.php</span>
+├── Arch/
+│   └── <span style="color:#34d399">ArchTest.php</span>
+├── <span style="color:#34d399">Pest.php</span>
+└── <span style="color:#34d399">TestCase.php</span></code></div>
+
+            <h3 class="subsection-title">8.2 测试命名规范</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐</span>
+                    <div class="code-block p-4"><code><span style="color:#67e8f9">it</span>(<span style="color:#34d399">'creates order when data is valid'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'rejects invalid email format'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'calculates discount for VIP users'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'sends notification on status change'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'requires authentication for access'</span>)</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免</span>
+                    <div class="code-block p-4"><code><span style="color:#67e8f9">it</span>(<span style="color:#34d399">'test_order'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'it works'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'checks email'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'test123'</span>)
+<span style="color:#67e8f9">it</span>(<span style="color:#34d399">'test_vip_discount_function'</span>)</code></div>
+                </div>
+            </div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> AAA 模式</div>
+                <p>每个测试遵循 <strong style="color:#e0e7ff">Arrange（准备）→ Act（执行）→ Assert（断言）</strong> 模式。把三部分用空行隔开，测试结构一目了然。</p>
+            </div>
+
+            <!-- ====== Section 9 ====== -->
+            <h2 class="section-title" id="coverage">覆盖率与 CI</h2>
+
+            <h3 class="subsection-title">9.1 查看覆盖率</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># 生成 HTML 覆盖率报告</span>
+php artisan test --coverage
+
+<span style="color:#6b7280"># 最低覆盖率门槛（低于则失败）</span>
+php artisan test --min=80
+
+<span style="color:#6b7280"># 查看特定目录覆盖率</span>
+php artisan test --coverage --filter=Services
+
+<span style="color:#6b7280"># HTML 报告输出</span>
+php artisan test --coverage-html=coverage-report</code></div>
+
+            <h3 class="subsection-title">9.2 CI 中的覆盖率报告</h3>
+            <div class="code-block p-4"><span class="code-label">.github/workflows/quality.yml（测试部分）</span><code>      - <span style="color:#34d399">name</span>: Run Pest Tests
+        <span style="color:#34d399">run</span>: php artisan test --parallel --coverage --min=80
+
+      - <span style="color:#34d399">name</span>: Upload Coverage
+        <span style="color:#34d399">if</span>: always()
+        <span style="color:#34d399">uses</span>: actions/upload-artifact@v4
+        <span style="color:#34d399">with</span>:
+          <span style="color:#34d399">name</span>: coverage-report
+          <span style="color:#34d399">path</span>: coverage-report/</code></div>
+
+            <h3 class="subsection-title">9.3 并行测试</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># 自动检测 CPU 核心数，并行执行</span>
+php artisan test --parallel
+
+<span style="color:#6b7280"># 指定进程数</span>
+php artisan test --parallel --processes=4
+
+<span style="color:#6b7280"># 并行 + 覆盖率</span>
+php artisan test --parallel --coverage</code></div>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> 团队覆盖率目标</div>
+                <p><strong style="color:#e0e7ff">目标：> 80%</strong>，核心业务模块（支付、权限、订单）要求 <strong style="color:#e0e7ff">> 95%</strong>。CI 中设置 <code>--min=80</code> 作为最低门槛，PR 无法低于此标准合并。</p>
+            </div>
+
+            <!-- ====== Section 10 ====== -->
+            <h2 class="section-title" id="best-practices">测试最佳实践</h2>
+
+            <h3 class="subsection-title">10.1 测试铁律</h3>
+            <table class="comparison-table">
+                <thead><tr><th>原则</th><th>说明</th><th>示例</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">测试行为，不测试实现</strong></td>
+                        <td>关心"做了什么"而非"怎么做的"</td>
+                        <td>✅ 验证返回值 vs ❌ 验证内部变量</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">一个测试一个断言</strong></td>
+                        <td>测试失败时能立即定位问题</td>
+                        <td>✅ 一段逻辑一组测试 vs ❌ 一个测试 20 个断言</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">测试之间完全隔离</strong></td>
+                        <td>不依赖其他测试的状态</td>
+                        <td>✅ 每个测试独立建数据 vs ❌ 依赖上一个测试的 ID</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">测试名就是文档</strong></td>
+                        <td>不需要额外注释说明测试意图</td>
+                        <td>✅ "rejects expired coupon" 自文档化</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">避免测试框架代码</strong></td>
+                        <td>不要测试 Laravel 自带功能</td>
+                        <td>❌ 测试 Eloquent save() 方法是否存入数据库</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color:#e0e7ff">FIRST 原则</strong></td>
+                        <td>Fast / Independent / Repeatable / Self-validating / Timely</td>
+                        <td>测试应该快、独立、可重复、自验证、及时写</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">10.2 什么不需要测试</h3>
+            <ul>
+                <li>Laravel 框架自带功能（Eloquent ORM、路由匹配、中间件管道）</li>
+                <li>第三方包的功能（Stripe SDK、AWS SDK）</li>
+                <li>简单的 Getter/Setter 和纯数据类</li>
+                <li>Controller 中的依赖注入绑定（框架已测试）</li>
+            </ul>
+
+            <h3 class="subsection-title">10.3 优先级排序</h3>
+            <div class="code-block p-4" style="padding:1.25rem"><code><span style="color:#fbbf24">🔴 高优先级</span>  — 支付、权限验证、价格计算、订单状态流转
+<span style="color:#a78bafa">🟡 中优先级</span>  — API 接口契约、数据验证、邮件/通知触发
+<span style="color:#6b7280">🟢 低优先级</span>  — 管理后台 CRUD、静态页面渲染、日志记录</code></div>
+
+            <!-- ====== Section 11 ====== -->
+            <h2 class="section-title" id="pitfalls">常见陷阱与避坑指南</h2>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>1. 不用 fake 直接发真实请求</h5>
+                    <p>HTTP 测试中调用外部 API（Stripe、SMS）会发送真实请求，导致扣费或限流。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：使用 <code>Http::fake()</code>、<code>Mail::fake()</code>、<code>Event::fake()</code>。</p>
+                </div>
+            </div>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>2. 测试依赖执行顺序</h5>
+                    <p>测试 A 创建了用户，测试 B 假设用户存在——单独运行测试 B 会失败。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：每个测试用 <code>beforeEach()</code> 或 Factory 创建自己的数据。</p>
+                </div>
+            </div>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>3. 忽略测试环境配置</h5>
+                    <p>测试连接了生产数据库或真实的缓存/队列驱动。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：<code>phpunit.xml</code> 中使用 <code>&lt;env name="DB_DATABASE" value="testing"/&gt;</code>，确保 <code>APP_ENV=testing</code>。</p>
+                </div>
+            </div>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>4. 过度使用 RefreshDatabase</h5>
+                    <p>对大量测试使用 RefreshDatabase（事务回滚）在并行测试时可能冲突。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：使用 <code>--parallel</code> 时确保每个测试进程使用独立数据库（Laravel 自动处理）。</p>
+                </div>
+            </div>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>5. 测试名描述"怎么做"而非"是什么"</h5>
+                    <p><code>it('uses array_filter to remove nulls')</code> — 实现细节改变后测试名就过时了。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：<code>it('removes null values from collection')</code> — 关注结果。</p>
+                </div>
+            </div>
+
+            <div class="pitfall-card">
+                <div class="pitfall-icon"><i class="fas fa-bug"></i></div>
+                <div>
+                    <h5>6. 一个文件放太多测试</h5>
+                    <p>一个文件 50+ 个测试，难以维护和定位。<br>
+                    <strong style="color:#e0e7ff">修复</strong>：按功能拆分子目录（<code>Auth/LoginTest.php</code>、<code>Auth/RegisterTest.php</code>），每个文件 5-20 个测试。</p>
+                </div>
+            </div>
+
+            <!-- ====== 速查清单 ====== -->
+            <div class="tip-card good" style="margin-top:2rem">
+                <div class="tip-label"><i class="fas fa-clipboard-check"></i> Pest 速查清单</div>
+                <p style="margin-bottom:0.75rem"><strong style="color:#e0e7ff">✅ 每次提交前必做</strong></p>
+                <ul style="margin-bottom:1.25rem">
+                    <li><code>composer test</code> — 确保所有测试通过</li>
+                    <li><code>composer test --parallel</code> — 并行运行验证无冲突</li>
+                    <li>新功能必须包含对应测试</li>
+                    <li>Bug 修复必须先写失败的测试（红 → 绿 → 重构）</li>
+                </ul>
+                <p style="margin-bottom:0.75rem"><strong style="color:#e0e7ff">✅ 代码审查时检查</strong></p>
+                <ul>
+                    <li>测试名是否描述了业务行为？</li>
+                    <li>是否使用了 <code>Mail::fake()</code> / <code>Http::fake()</code>？</li>
+                    <li>是否有不必要的 Mock（过度 Mock = 测试与实现耦合）？</li>
+                    <li>覆盖率是否达标（核心模块 > 95%）？</li>
+                </ul>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="page-nav">
+                <a href="dev-toolchain.html">
+                    <span class="nav-dir"><i class="fas fa-arrow-left"></i> 上一篇</span>
+                    <span class="nav-title">静态分析与工具链</span>
+                </a>
+                <a href="git-workflow.html" class="next">
+                    <span class="nav-dir">下一篇 <i class="fas fa-arrow-right"></i></span>
+                    <span class="nav-title">Git 工作流</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/common.js"></script>
+</body>
+</html>

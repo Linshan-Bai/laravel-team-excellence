@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSR-12 代码规范详解 — Laravel 卓越体系</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .inline-code { display: inline; }
+        p code, li code, td code { font-family: var(--font-mono); font-size: 0.85em; background: rgba(102, 126, 234, 0.15); color: #a5b4fc; padding: 0.15rem 0.45rem; border-radius: 6px; border: 1px solid rgba(102, 126, 234, 0.2); }
+        .content p, .content li, .content td { line-height: 1.85; }
+        .content ul, .content ol { padding-left: 1.5rem; margin: 0.75rem 0; }
+        .content ul { list-style: disc; }
+        .content ol { list-style: decimal; }
+        .content li { margin-bottom: 0.35rem; color: var(--text-secondary); }
+        .content p { color: var(--text-secondary); margin-bottom: 0.85rem; }
+        .dual-code { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+        .dual-code > div { position: relative; }
+        .dual-code .good-label { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 6px; z-index: 2; }
+        .dual-code .good-label.green { background: rgba(16,185,129,0.2); color: #34d399; }
+        .dual-code .good-label.red { background: rgba(239,68,68,0.2); color: #f87171; }
+        @media (max-width: 768px) { .dual-code { grid-template-columns: 1fr; } }
+        .toc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+        .toc-box ol { list-style: decimal; padding-left: 1.5rem; }
+        .toc-box li { margin-bottom: 0.5rem; }
+        .toc-box a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .toc-box a:hover { color: #a5b4fc; }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-brand">
+                <div class="brand-icon"><i class="fas fa-gem text-white text-sm"></i></div>
+                <span>Laravel 卓越体系</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#roadmap">路线图</a></li>
+                <li><a href="../index.html#phases" class="active">知识库</a></li>
+                <li><a href="../index.html#getting-started">快速开始</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="phase-divider">
+                <span class="phase-num" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff">1</span>
+                <span class="phase-label">代码质量基础</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4>主题</h4>
+            <ul class="sidebar-nav">
+                <li><a href="psr12-code-standards.html" class="active">
+                    <span class="nav-icon"><i class="fas fa-code"></i></span>PSR-12 代码规范
+                    <span class="nav-badge current">当前</span>
+                </a></li>
+                <li><a href="dev-toolchain.html">
+                    <span class="nav-icon"><i class="fas fa-microscope"></i></span>静态分析与工具链
+                    <span class="nav-badge upcoming">下一</span>
+                </a></li>
+                <li><a href="pest-testing.html">
+                    <span class="nav-icon"><i class="fas fa-flask-vial"></i></span>Pest 测试框架
+                    <span class="nav-badge upcoming"></span>
+                </a></li>
+                <li><a href="git-workflow.html">
+                    <span class="nav-icon"><i class="fab fa-git-alt"></i></span>Git 工作流
+                    <span class="nav-badge upcoming"></span>
+                </a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">2</span>
+                <span class="phase-label">架构设计升级</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-layer-group"></i></span>三层架构</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-diagram-project"></i></span>依赖注入</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">3</span>
+                <span class="phase-label">性能优化</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-database"></i></span>N+1 查询</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-bolt"></i></span>缓存策略</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">4</span>
+                <span class="phase-label">测试体系</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-vial"></i></span>CI/CD</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-chart-line"></i></span>覆盖率</a></li>
+            </ul>
+        </aside>
+
+        <!-- 正文 -->
+        <main class="content">
+            <!-- 文章头部 -->
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../index.html">首页</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <a href="../index.html#phases">第一阶段：代码质量基础</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <span>PSR-12 代码规范</span>
+                </div>
+                <h1>PSR-12 代码规范详解</h1>
+                <p class="page-desc">PHP 编码标准的完整实践指南 —— 从命名规范、类型提示到方法设计原则，建立团队统一的代码风格基线。</p>
+                <div class="page-meta">
+                    <span><i class="far fa-clock"></i> 阅读约 20 分钟</span>
+                    <span><i class="far fa-bookmark"></i> 第一阶段 · 主题 1/4</span>
+                    <span class="tag tag-emerald">基础必学</span>
+                </div>
+            </div>
+
+            <!-- 目录 -->
+            <div class="toc-box">
+                <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.75rem"><i class="fas fa-list-ul" style="color:#a5b4fc;margin-right:0.5rem"></i>本文目录</h3>
+                <ol>
+                    <li><a href="#why-standards">为什么需要代码规范</a></li>
+                    <li><a href="#naming">命名规范</a></li>
+                    <li><a href="#type-hints">严格类型提示</a></li>
+                    <li><a href="#comments">注释规范</a></li>
+                    <li><a href="#method-design">方法设计原则</a></li>
+                    <li><a href="#class-structure">类与文件结构</a></li>
+                    <li><a href="#editorconfig">EditorConfig 配置</a></li>
+                    <li><a href="#php-cs-fixer">PHP-CS-Fixer 自动化</a></li>
+                    <li><a href="#cheatsheet">速查清单</a></li>
+                </ol>
+            </div>
+
+            <!-- ====== Section 1 ====== -->
+            <h2 class="section-title" id="why-standards">为什么需要代码规范</h2>
+            <p>代码规范不是教条——它是一份<strong style="color:#e0e7ff">团队契约</strong>。统一的编码风格让代码像一个人写的，降低认知负担，减少 Code Review 中的格式争论。</p>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> 规范带来的好处</div>
+                <ul>
+                    <li><strong style="color:#e0e7ff">降低认知负担</strong> — 阅读代码时不需要适应不同人的风格</li>
+                    <li><strong style="color:#e0e7ff">减少 Review 噪音</strong> — 格式问题交给工具，Review 专注逻辑</li>
+                    <li><strong style="color:#e0e7ff">新人快速上手</strong> — 统一风格 = 统一期望</li>
+                    <li><strong style="color:#e0e7ff">自动化检查</strong> — 配合 Laravel Pint 实现零人工干预</li>
+                </ul>
+            </div>
+
+            <p>Laravel 生态遵循 <span class="inline-code">PSR-12</span>（PHP-FIG 扩展编码风格），在此基础上我们增加团队约定。</p>
+
+            <!-- ====== Section 2 ====== -->
+            <h2 class="section-title" id="naming">命名规范</h2>
+
+            <h3 class="subsection-title">2.1 概览表</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>元素</th>
+                        <th>风格</th>
+                        <th>示例</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>类名</td><td><span class="inline-code">PascalCase</span></td><td><code>UserController</code>, <code>InvoiceService</code></td></tr>
+                    <tr><td>方法名</td><td><span class="inline-code">camelCase</span></td><td><code>getActiveUsers()</code>, <code>calculateTotal()</code></td></tr>
+                    <tr><td>变量名</td><td><span class="inline-code">camelCase</span></td><td><code>$userAccount</code>, <code>$totalPrice</code></td></tr>
+                    <tr><td>常量</td><td><span class="inline-code">UPPER_SNAKE</span></td><td><code>MAX_RETRY_COUNT</code>, <code>DEFAULT_STATUS</code></td></tr>
+                    <tr><td>数据库字段</td><td><span class="inline-code">snake_case</span></td><td><code>created_at</code>, <code>user_id</code>, <code>is_active</code></td></tr>
+                    <tr><td>数据库表名</td><td><span class="inline-code">snake_case</span>（复数）</td><td><code>users</code>, <code>order_items</code></td></tr>
+                    <tr><td>配置键</td><td><span class="inline-code">snake_case</span>（点号层级）</td><td><code>app.timezone</code>, <code>services.stripe.key</code></td></tr>
+                    <tr><td>环境变量</td><td><span class="inline-code">UPPER_SNAKE</span></td><td><code>APP_ENV</code>, <code>DB_DATABASE</code></td></tr>
+                    <tr><td>视图文件</td><td><span class="inline-code">kebab-case</span></td><td><code>user-profile.blade.php</code></td></tr>
+                    <tr><td>路由命名</td><td><span class="inline-code">kebab-case</span>（点号层级）</td><td><code>users.profile</code>, <code>orders.store</code></td></tr>
+                    <tr><td>事件名</td><td><span class="inline-code">PascalCase</span></td><td><code>UserRegistered</code>, <code>OrderPlaced</code></td></tr>
+                    <tr><td>队列任务</td><td><span class="inline-code">PascalCase</span></td><td><code>ProcessInvoice</code>, <code>SendNotification</code></td></tr>
+                    <tr><td>Migration 文件</td><td><span class="inline-code">snake_case</span></td><td><code>2024_01_01_create_users_table.php</code></td></tr>
+                    <tr><td>测试方法</td><td><span class="inline-code">camelCase</span> 或 <span class="inline-code">snake_case</span></td><td><code>test_user_can_register</code>, <code>it_handles_empty_cart</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">2.2 布尔变量和方法</h3>
+            <p>布尔变量/方法使用 <code>is</code>、<code>has</code>、<code>can</code>、<code>should</code> 等前缀，让意图不言自明：</p>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐</span>
+                    <div class="code-block p-4"><code><span style="color:#fbbf24">$isActive</span> = true;
+<span style="color:#fbbf24">$hasPermission</span> = false;
+<span style="color:#c084fc">if</span> ($user-><span style="color:#67e8f9">canEdit</span>()) { ... }
+<span style="color:#c084fc">if</span> ($order-><span style="color:#67e8f9">hasItems</span>()) { ... }
+<span style="color:#c084fc">if</span> ($this-><span style="color:#67e8f9">shouldRetry</span>()) { ... }</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免</span>
+                    <div class="code-block p-4"><code><span style="color:#fbbf24">$active</span> = true;
+<span style="color:#fbbf24">$permission</span> = false;
+<span style="color:#c084fc">if</span> ($user-><span style="color:#67e8f9">edit</span>()) { ... }
+<span style="color:#c084fc">if</span> ($order-><span style="color:#67e8f9">items</span>()) { ... }
+<span style="color:#c084fc">if</span> ($this-><span style="color:#67e8f9">retry</span>()) { ... }</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">2.3 避免缩写和单字母</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐</span>
+                    <div class="code-block p-4"><code><span style="color:#fbbf24">$userAccount</span>
+<span style="color:#fbbf24">$paymentMethod</span>
+<span style="color:#fbbf24">$orderRepository</span>
+<span style="color:#c084fc">function</span> <span style="color:#67e8f9">getActiveUsers</span>()</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免</span>
+                    <div class="code-block p-4"><code><span style="color:#fbbf24">$usrAcc</span>
+<span style="color:#fbbf24">$payMeth</span>
+<span style="color:#fbbf24">$orderRepo</span>
+<span style="color:#c084fc">function</span> <span style="color:#67e8f9">getUsers</span>()</code></div>
+                </div>
+            </div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> 例外</div>
+                <p>常见缩写可接受：使用 <code>$id</code> 而非 <code>$identifier</code>（太长），<code>$url</code> 而非 <code>$uniformResourceLocator</code>（过分）。循环计数器 <code>$i</code>、<code>$j</code> 也可以。</p>
+            </div>
+
+            <!-- ====== Section 3 ====== -->
+            <h2 class="section-title" id="type-hints">严格类型提示</h2>
+            <p>PHP 8.3 + Laravel 11 完全支持类型系统。<strong style="color:#e0e7ff">团队约定：所有方法参数和返回值都必须声明类型。</strong></p>
+
+            <h3 class="subsection-title">3.1 方法签名</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 完整类型提示</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getActiveUsers</span>(
+    <span style="color:#a78bfa">string</span> $role,
+    <span style="color:#a78bfa">int</span> $limit = 20,
+): <span style="color:#a78bfa">Collection</span> {
+    <span style="color:#c084fc">return</span> $this->user
+        ->where(<span style="color:#34d399">'role'</span>, $role)
+        ->where(<span style="color:#34d399">'is_active'</span>, <span style="color:#c084fc">true</span>)
+        ->limit($limit)
+        ->get();
+}</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 无类型声明</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getActiveUsers</span>(
+    $role,
+    $limit = 20,
+) {
+    <span style="color:#c084fc">return</span> $this->user
+        ->where(<span style="color:#34d399">'role'</span>, $role)
+        ->where(<span style="color:#34d399">'is_active'</span>, <span style="color:#c084fc">true</span>)
+        ->limit($limit)
+        ->get();
+}</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">3.2 属性类型声明</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">class</span> <span style="color:#67e8f9">CreateOrderRequest</span> <span style="color:#c084fc">extends</span> FormRequest
+{
+    <span style="color:#c084fc">public readonly</span> <span style="color:#a78bfa">string</span> $customerName;
+    <span style="color:#c084fc">public readonly</span> <span style="color:#a78bfa">int</span> $quantity;
+    <span style="color:#c084fc">public readonly</span> <span style="color:#a78bfa">?string</span> $couponCode;
+    <span style="color:#c084fc">public readonly</span> <span style="color:#a78bfa">CarbonImmutable</span> $orderedAt;
+}</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">class</span> <span style="color:#67e8f9">CreateOrderRequest</span> <span style="color:#c084fc">extends</span> FormRequest
+{
+    <span style="color:#c084fc">public</span> $customerName;
+    <span style="color:#c084fc">public</span> $quantity;
+    <span style="color:#c084fc">public</span> $couponCode;
+    <span style="color:#c084fc">public</span> $orderedAt;
+}</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">3.3 Nullable 与联合类型</h3>
+            <div class="code-block p-4"><span class="code-label">PHP 8.3</span><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">findUser</span>(<span style="color:#a78bfa">int</span> $id): <span style="color:#a78bfa">?User</span>
+{
+    <span style="color:#c084fc">return</span> User::find($id); <span style="color:#6b7280">// 可能返回 null</span>
+}
+
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">resolveValue</span>(<span style="color:#a78bfa">string|int</span> $key): <span style="color:#a78bfa">string|int|null</span>
+{
+    <span style="color:#c084fc">return</span> $this->cache[$key] ?? <span style="color:#c084fc">null</span>;
+}
+
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">filter</span>(
+    <span style="color:#a78bfa">callable</span>(<span style="color:#a78bfa">int</span>): <span style="color:#a78bfa">bool</span> $callback,
+    <span style="color:#a78bfa">array</span>&lt;<span style="color:#a78bfa">int</span>&gt; $items,
+): <span style="color:#a78bfa">array</span> { ... }</code></div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> 实用技巧</div>
+                <ul>
+                    <li>数组元素类型用泛型注释 <code>/** @param array&lt;User&gt; $users */</code></li>
+                    <li>集合返回值写 <code>@return Collection&lt;int, User&gt;</code></li>
+                    <li><code>declare(strict_types=1)</code> 放在文件最顶部</li>
+                </ul>
+            </div>
+
+            <h3 class="subsection-title">3.4 Enum 类型（PHP 8.1+）</h3>
+            <p>Laravel 11 全面支持枚举，用 <code>Enum</code> 替代魔术字符串和整数常量：</p>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 使用 Enum</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">enum</span> <span style="color:#67e8f9">OrderStatus</span>: <span style="color:#a78bfa">string</span>
+{
+    <span style="color:#c084fc">case</span> Pending = <span style="color:#34d399">'pending'</span>;
+    <span style="color:#c084fc">case</span> Paid = <span style="color:#34d399">'paid'</span>;
+    <span style="color:#c084fc">case</span> Shipped = <span style="color:#34d399">'shipped'</span>;
+    <span style="color:#c084fc">case</span> Cancelled = <span style="color:#34d399">'cancelled'</span>;
+}
+
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">updateStatus</span>(
+    <span style="color:#a78bfa">OrderStatus</span> $status
+): <span style="color:#a78bfa">void</span> { ... }</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 魔术字符串</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">updateStatus</span>(
+    <span style="color:#a78bfa">string</span> $status
+): <span style="color:#a78bfa">void</span> {
+    <span style="color:#c084fc">if</span> ($status === <span style="color:#34d399">'pending'</span>) { ... }
+    <span style="color:#c084fc">if</span> ($status === <span style="color:#34d399">'paid'</span>) { ... }
+    <span style="color:#6b7280">// 拼写错误不会报错！</span>
+}</code></div>
+                </div>
+            </div>
+
+            <!-- ====== Section 4 ====== -->
+            <h2 class="section-title" id="comments">注释规范</h2>
+
+            <h3 class="subsection-title">4.1 核心原则：代码 > 注释</h3>
+            <p>好的代码自己会说话。注释应该解释 <strong style="color:#e0e7ff">Why</strong>（为什么），而不是 <strong style="color:#e0e7ff">What</strong>（做了什么）。</p>
+
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 代码即文档</span>
+                    <div class="code-block p-4"><code><span style="color:#6b7280">// 计算到期日：合同到期前 30 天通知</span>
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getNotificationDate</span>(): <span style="color:#a78bfa">Carbon</span>
+{
+    <span style="color:#c084fc">return</span> $this->expires_at->subDays(30);
+}
+
+<span style="color:#6b7280">// 使用二分查找而非线性搜索
+// 因为数据集已排序且超过 10000 条</span>
+$result = $this-><span style="color:#67e8f9">binarySearch</span>($items, $target);</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 废话注释</span>
+                    <div class="code-block p-4"><code><span style="color:#6b7280">// 获取用户名</span>
+$name = $user->name;
+
+<span style="color:#6b7280">// 循环遍历订单</span>
+<span style="color:#c084fc">foreach</span> ($orders <span style="color:#c084fc">as</span> $order) {
+    <span style="color:#6b7280">// 处理每个订单</span>
+    $this-><span style="color:#67e8f9">process</span>($order);
+}
+
+<span style="color:#6b7280">// 返回 true</span>
+<span style="color:#c084fc">return true</span>;</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">4.2 DocBlock 注释</h3>
+            <p>以下场景 <strong style="color:#e0e7ff">必须</strong> 写 DocBlock：</p>
+            <ul>
+                <li>类的用途说明</li>
+                <li>复杂方法的参数/返回值（类型提示不够直观时）</li>
+                <li>公共 API 接口</li>
+                <li>包含复杂业务逻辑的地方</li>
+            </ul>
+
+            <div class="code-block p-4"><span class="code-label">DocBlock 示例</span><code><span style="color:#6b7280">/**
+ * 计算订单折扣金额
+ *
+ * 应用多层折扣规则：会员折扣 → 满减优惠 → 优惠券 → 限时折扣
+ * 折扣按优先级从高到低依次叠加，最终折扣不超过商品总价
+ *
+ * @param  Order  $order  需要计算折扣的订单
+ * @return DiscountResult  包含折扣明细和最终价格的结果对象
+ *
+ * @throws InsufficientStockException 当库存不足时
+ * @throws ExpiredCouponException     当优惠券已过期时
+ */</span>
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">calculateDiscount</span>(<span style="color:#a78bfa">Order</span> $order): <span style="color:#a78bfa">DiscountResult</span></code></div>
+
+            <h3 class="subsection-title">4.3 TODO / FIXME</h3>
+            <div class="code-block p-4"><code><span style="color:#6b7280">// TODO: 添加缓存层，当前每次都查数据库 (Linshan 2026-04-01)
+// FIXME: 并发场景下可能出现超卖问题，需加分布式锁</span></code></div>
+
+            <div class="tip-card warn">
+                <div class="tip-label"><i class="fas fa-exclamation-triangle"></i> 注意</div>
+                <p>每个 TODO/FIXME 必须附上负责人和日期。超过 30 天的 TODO 应在 Sprint 回顾中讨论——要么解决，要么删掉。</p>
+            </div>
+
+            <!-- ====== Section 5 ====== -->
+            <h2 class="section-title" id="method-design">方法设计原则</h2>
+
+            <h3 class="subsection-title">5.1 单一职责</h3>
+            <p>每个方法只做一件事。方法长度控制在 <strong style="color:#e0e7ff">20 行以内</strong>，超过就拆分。</p>
+
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 拆分为多个小方法</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">processOrder</span>(<span style="color:#a78bfa">Order</span> $order): <span style="color:#a78bfa">OrderResult</span>
+{
+    $this-><span style="color:#67e8f9">validateStock</span>($order);
+    $this-><span style="color:#67e8f9">applyDiscount</span>($order);
+    $this-><span style="color:#67e8f9">reserveInventory</span>($order);
+    $payment = $this-><span style="color:#67e8f9">processPayment</span>($order);
+
+    <span style="color:#c084fc">return</span> OrderResult::<span style="color:#67e8f9">from</span>($order, $payment);
+}</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 一个方法做所有事</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">processOrder</span>(<span style="color:#a78bfa">Order</span> $order)
+{
+    <span style="color:#c084fc">foreach</span> ($order->items <span style="color:#c084fc">as</span> $item) {
+        <span style="color:#c084fc">if</span> ($item->stock &lt; $item->qty) {
+            <span style="color:#c084fc">throw new</span> ...;
+        }
+    }
+    <span style="color:#c084fc">if</span> ($order->coupon) {
+        <span style="color:#6b7280">// 50 行折扣计算...</span>
+    }
+    <span style="color:#6b7280">// 还有 100 行...</span>
+}</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">5.2 参数数量</h3>
+            <p>方法参数不超过 <strong style="color:#e0e7ff">3 个</strong>。超过时使用 DTO（数据传输对象）或数组：</p>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 使用 DTO</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">createUser</span>(
+    <span style="color:#a78bafa">CreateUserDTO</span> $data,
+): <span style="color:#a78bafa">User</span> { ... }
+
+<span style="color:#6b7280">// DTO 中包含 name, email,
+// password, role 等所有字段</span></code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 参数过多</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">createUser</span>(
+    <span style="color:#a78bafa">string</span> $name,
+    <span style="color:#a78bafa">string</span> $email,
+    <span style="color:#a78bafa">string</span> $password,
+    <span style="color:#a78bafa">string</span> $role,
+    <span style="color:#a78bafa">bool</span> $isActive,
+    <span style="color:#a78bafa">?string</span> $avatar,
+): <span style="color:#a78bafa">User</span> { ... }</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">5.3 尽早返回（Guard Clauses）</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 扁平化逻辑</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getPrice</span>(<span style="color:#a78bafa">?Product</span> $product): <span style="color:#a78bafa">int</span>
+{
+    <span style="color:#c084fc">if</span> ($product === <span style="color:#c084fc">null</span>) {
+        <span style="color:#c084fc">return</span> 0;
+    }
+
+    <span style="color:#c084fc">if</span> ($product->isFree()) {
+        <span style="color:#c084fc">return</span> 0;
+    }
+
+    <span style="color:#c084fc">if</span> ($product->isOnSale()) {
+        <span style="color:#c084fc">return</span> $product->salePrice();
+    }
+
+    <span style="color:#c084fc">return</span> $product->price;
+}</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免 — 深层嵌套</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getPrice</span>(<span style="color:#a78bafa">?Product</span> $product): <span style="color:#a78bafa">int</span>
+{
+    <span style="color:#c084fc">if</span> ($product !== <span style="color:#c084fc">null</span>) {
+        <span style="color:#c084fc">if</span> (!$product->isFree()) {
+            <span style="color:#c084fc">if</span> ($product->isOnSale()) {
+                <span style="color:#c084fc">return</span> $product->salePrice();
+            } <span style="color:#c084fc">else</span> {
+                <span style="color:#c084fc">return</span> $product->price;
+            }
+        }
+    }
+    <span style="color:#c084fc">return</span> 0;
+}</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">5.4 避免布尔参数</h3>
+            <p>布尔参数让调用处的代码不可读：<code>$service->send(true, false)</code> 谁知道这是什么意思？</p>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 推荐 — 语义清晰的方法</span>
+                    <div class="code-block p-4"><code><span style="color:#6b7280">// 调用处一目了然</span>
+$notifier-><span style="color:#67e8f9">sendWithRetry</span>($order);
+$notifier-><span style="color:#67e8f9">sendWithoutRetry</span>($order);
+$notifier-><span style="color:#67e8f9">sendSilently</span>($order);</code></div>
+                </div>
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 避免</span>
+                    <div class="code-block p-4"><code><span style="color:#6b7280">// 什么意思？</span>
+$notifier-><span style="color:#67e8f9">send</span>($order, <span style="color:#c084fc">true</span>, <span style="color:#c084fc">false</span>);</code></div>
+                </div>
+            </div>
+
+            <!-- ====== Section 6 ====== -->
+            <h2 class="section-title" id="class-structure">类与文件结构</h2>
+
+            <h3 class="subsection-title">6.1 文件规则</h3>
+            <ul>
+                <li>每个文件<strong style="color:#e0e7ff">只包含一个类</strong></li>
+                <li>文件名与类名完全一致：<code>UserController.php</code></li>
+                <li>声明 <code>declare(strict_types=1)</code> 在最顶部</li>
+                <li>命名空间与目录结构一致：<code>App\Services\Payment</code></li>
+                <li>使用 <code>use</code> 引入类，不写完整命名空间</li>
+            </ul>
+
+            <div class="code-block p-4"><span class="code-label">文件模板</span><code>&lt;?php
+
+<span style="color:#c084fc">declare</span>(strict_types=1);
+
+<span style="color:#c084fc">namespace</span> App\Services\Payment;
+
+<span style="color:#c084fc">use</span> App\Models\Order;
+<span style="color:#c084fc">use</span> Illuminate\Support\Facades\Log;
+<span style="color:#c084fc">use</span> RuntimeException;
+
+<span style="color:#6b7280">/**
+ * 处理支付相关业务逻辑
+ */</span>
+<span style="color:#c084fc">class</span> <span style="color:#67e8f9">PaymentService</span>
+{
+    <span style="color:#c084fc">public function</span> <span style="color:#67e8f9">__construct</span>(
+        <span style="color:#c084fc">private readonly</span> PaymentGateway $gateway,
+        <span style="color:#c084fc">private readonly</span> Logger $logger,
+    ) {}
+
+    <span style="color:#c084fc">public function</span> <span style="color:#67e8f9">process</span>(<span style="color:#a78bafa">Order</span> $order): <span style="color:#a78bafa">PaymentResult</span>
+    {
+        <span style="color:#6b7280">// ...</span>
+    }
+}</code></div>
+
+            <h3 class="subsection-title">6.2 类成员排列顺序</h3>
+            <p>保持一致的排列顺序能帮助快速定位代码：</p>
+            <ol style="color:var(--text-secondary);padding-left:1.5rem;margin:0.75rem 0">
+                <li><strong style="color:#e0e7ff">use 语句</strong> — 按字母排序，分三组（PHP 内置 / 第三方 / 应用内）</li>
+                <li><strong style="color:#e0e7ff">常量</strong> — <code>public const</code></li>
+                <li><strong style="color:#e0e7ff">属性</strong> — 先 public 再 protected 最后 private</li>
+                <li><strong style="color:#e0e7ff">构造函数</strong> — <code>__construct()</code></li>
+                <li><strong style="color:#e0e7ff">公共方法</strong></li>
+                <li><strong style="color:#e0e7ff">受保护方法</strong></li>
+                <li><strong style="color:#e0e7ff">私有方法</strong></li>
+            </ol>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> use 语句分组</div>
+                <div class="code-block p-4"><code><span style="color:#c084fc">use</span> RuntimeException;                          <span style="color:#6b7280">// PHP 内置</span>
+<span style="color:#c084fc">use</span> Illuminate\Support\Collection;             <span style="color:#6b7280">// 框架</span>
+<span style="color:#c084fc">use</span> Carbon\CarbonImmutable;                     <span style="color:#6b7280">// 第三方</span>
+<span style="color:#6b7280">// 空行分隔</span>
+<span style="color:#c084fc">use</span> App\Models\User;                             <span style="color:#6b7280">// 应用内</span>
+<span style="color:#c084fc">use</span> App\Services\NotificationService;</code></div>
+            </div>
+
+            <!-- ====== Section 7 ====== -->
+            <h2 class="section-title" id="editorconfig">EditorConfig 配置</h2>
+            <p>EditorConfig 确保所有编辑器和 IDE 使用相同的缩进和格式。在项目根目录创建 <code>.editorconfig</code>：</p>
+            <div class="code-block p-4"><span class="code-label">.editorconfig</span><code>root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml,json}]
+indent_size = 2
+
+[*.blade.php]
+indent_size = 4
+
+[composer.json]
+indent_size = 4</code></div>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> 编辑器支持</div>
+                <p>VS Code、PhpStorm、Sublime Text 等主流编辑器都原生支持 EditorConfig。团队成员 clone 项目后自动生效，无需手动配置。</p>
+            </div>
+
+            <!-- ====== Section 8 ====== -->
+            <h2 class="section-title" id="php-cs-fixer">PHP-CS-Fixer 自动化</h2>
+            <p>Laravel Pint 底层使用 PHP-CS-Fixer。以下是 Pint 的配置方法：</p>
+
+            <h3 class="subsection-title">8.1 安装 Laravel Pint</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code>composer require --dev laravel/pint</code></div>
+
+            <h3 class="subsection-title">8.2 配置 pint.json</h3>
+            <p>在项目根目录创建 <code>pint.json</code>，定义团队规则集：</p>
+            <div class="code-block p-4"><span class="code-label">pint.json</span><code>{
+    <span style="color:#34d399">"preset"</span>: <span style="color:#34d399">"laravel"</span>,
+    <span style="color:#34d399">"rules"</span>: {
+        <span style="color:#34d399">"strict_comparison"</span>: true,
+        <span style="color:#34d399">"explicit_string_variable"</span>: true,
+        <span style="color:#34d399">"fully_qualified_strict_types"</span>: true,
+        <span style="color:#34d399">"no_superfluous_phpdoc_tags"</span>: {
+            <span style="color:#34d399">"allow_mixed"</span>: true
+        },
+        <span style="color:#34d399">"ordered_imports"</span>: {
+            <span style="color:#34d399">"sort_algorithm"</span>: <span style="color:#34d399">"alpha"</span>,
+            <span style="color:#34d399">"imports_order"</span>: [
+                <span style="color:#34d399">"const"</span>, <span style="color:#34d399">"class"</span>, <span style="color:#34d399">"function"</span>
+            ]
+        },
+        <span style="color:#34d399">"single_line_after_imports"</span>: true,
+        <span style="color:#34d399">"trailing_comma_in_multiline"</span>: true,
+        <span style="color:#34d399">"native_function_invocation"</span>: {
+            <span style="color:#34d399">"include"</span>: ["@all"]
+        },
+        <span style="color:#34d399">"declare_strict_types"</span>: true,
+        <span style="color:#34d399">"blank_line_after_opening_tag"</span>: true
+    }
+}</code></div>
+
+            <h3 class="subsection-title">8.3 Composer Script 集成</h3>
+            <p>在 <code>composer.json</code> 中添加快捷命令：</p>
+            <div class="code-block p-4"><span class="code-label">composer.json</span><code>{
+    <span style="color:#34d399">"scripts"</span>: {
+        <span style="color:#34d399">"pint"</span>: <span style="color:#34d399">"./vendor/bin/pint"</span>,
+        <span style="color:#34d399">"pint:test"</span>: <span style="color:#34d399">"./vendor/bin/pint --test"</span>,
+        <span style="color:#34d399">"check"</span>: [
+            <span style="color:#34d399">"@pint:test"</span>,
+            <span style="color:#34d399">"./vendor/bin/phpstan analyse"</span>
+        ]
+    }
+}</code></div>
+
+            <h3 class="subsection-title">8.4 常用命令</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr><th>命令</th><th>说明</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>./vendor/bin/pint</code></td><td>自动修复所有文件</td></tr>
+                    <tr><td><code>./vendor/bin/pint --test</code></td><td>只检查不修改（CI 用）</td></tr>
+                    <tr><td><code>./vendor/bin/pint app/Services</code></td><td>只检查指定目录</td></tr>
+                    <tr><td><code>./vendor/bin/pint --dirty</code></td><td>只检查 Git 修改的文件</td></tr>
+                    <tr><td><code>composer pint</code></td><td>通过 Composer 运行</td></tr>
+                </tbody>
+            </table>
+
+            <!-- ====== Section 9 ====== -->
+            <h2 class="section-title" id="cheatsheet">速查清单</h2>
+            <p>日常开发中的快速对照表，建议打印或设为桌面便签：</p>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> 必须做到</div>
+                <ul>
+                    <li>✅ <code>declare(strict_types=1)</code> 在所有 PHP 文件顶部</li>
+                    <li>✅ 所有方法参数和返回值都有类型声明</li>
+                    <li>✅ 类名 <code>PascalCase</code>，方法/变量 <code>camelCase</code></li>
+                    <li>✅ 布尔变量用 <code>is/has/can/should</code> 前缀</li>
+                    <li>✅ 方法不超过 20 行，参数不超过 3 个</li>
+                    <li>✅ 用 Guard Clause 减少嵌套</li>
+                    <li>✅ 使用 Enum 替代魔术字符串</li>
+                    <li>✅ 注释解释 Why 而不是 What</li>
+                    <li>✅ <code>.editorconfig</code> 配置到位</li>
+                    <li>✅ 提交前运行 <code>composer pint</code></li>
+                </ul>
+            </div>
+
+            <div class="tip-card bad">
+                <div class="tip-label"><i class="fas fa-times-circle"></i> 坚决不做</div>
+                <ul>
+                    <li>❌ 不使用类型声明的方法</li>
+                    <li>❌ 魔术字符串 / 魔术数字（<code>if ($status === 3)</code>）</li>
+                    <li>❌ 超过 3 层的 if-else 嵌套</li>
+                    <li>❌ 超过 50 行的方法</li>
+                    <li>❌ 不写注释的复杂业务逻辑</li>
+                    <li>❌ 中英文混用的命名（<code>$yongHuMing</code>）</li>
+                    <li>❌ 单字母变量名（循环计数器除外）</li>
+                </ul>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="page-nav">
+                <a href="../index.html#phases">
+                    <span class="nav-dir"><i class="fas fa-arrow-left"></i> 返回</span>
+                    <span class="nav-title">知识库目录</span>
+                </a>
+                <a href="dev-toolchain.html" class="next">
+                    <span class="nav-dir">下一主题 <i class="fas fa-arrow-right"></i></span>
+                    <span class="nav-title">静态分析与工具链</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/common.js"></script>
+</body>
+</html>

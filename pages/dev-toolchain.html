@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>静态分析与工具链 — Laravel 卓越体系</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        p code, li code, td code { font-family: var(--font-mono); font-size: 0.85em; background: rgba(102, 126, 234, 0.15); color: #a5b4fc; padding: 0.15rem 0.45rem; border-radius: 6px; border: 1px solid rgba(102, 126, 234, 0.2); }
+        .content p, .content li, .content td { line-height: 1.85; }
+        .content ul, .content ol { padding-left: 1.5rem; margin: 0.75rem 0; }
+        .content ul { list-style: disc; }
+        .content ol { list-style: decimal; }
+        .content li { margin-bottom: 0.35rem; color: var(--text-secondary); }
+        .content p { color: var(--text-secondary); margin-bottom: 0.85rem; }
+        .dual-code { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+        .dual-code > div { position: relative; }
+        .dual-code .good-label { position: absolute; top: 0.5rem; right: 0.75rem; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 6px; z-index: 2; }
+        .dual-code .good-label.green { background: rgba(16,185,129,0.2); color: #34d399; }
+        .dual-code .good-label.red { background: rgba(239,68,68,0.2); color: #f87171; }
+        @media (max-width: 768px) { .dual-code { grid-template-columns: 1fr; } }
+        .toc-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 16px; padding: 1.5rem 2rem; margin-bottom: 2.5rem; }
+        .toc-box ol { list-style: decimal; padding-left: 1.5rem; }
+        .toc-box li { margin-bottom: 0.5rem; }
+        .toc-box a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .toc-box a:hover { color: #a5b4fc; }
+        .tool-card { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; align-items: center; padding: 1.25rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; margin-bottom: 1rem; transition: all 0.3s; }
+        .tool-card:hover { border-color: rgba(102,126,234,0.3); transform: translateX(4px); }
+        .tool-card .tool-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+        .tool-card .tool-info h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .tool-card .tool-info p { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+        .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 1.25rem 0; }
+        .level-item { padding: 1rem; border-radius: 12px; text-align: center; border: 1px solid var(--border-glass); }
+        .level-item .level-num { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .level-item .level-label { font-size: 0.75rem; color: var(--text-muted); }
+        @media (max-width: 768px) { .level-grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="site-nav">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-brand">
+                <div class="brand-icon"><i class="fas fa-gem text-white text-sm"></i></div>
+                <span>Laravel 卓越体系</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">首页</a></li>
+                <li><a href="../index.html#roadmap">路线图</a></li>
+                <li><a href="../index.html#phases" class="active">知识库</a></li>
+                <li><a href="../index.html#getting-started">快速开始</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="phase-divider">
+                <span class="phase-num" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff">1</span>
+                <span class="phase-label">代码质量基础</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4>主题</h4>
+            <ul class="sidebar-nav">
+                <li><a href="psr12-code-standards.html">
+                    <span class="nav-icon"><i class="fas fa-code"></i></span>PSR-12 代码规范
+                    <span class="nav-badge done">完成</span>
+                </a></li>
+                <li><a href="dev-toolchain.html" class="active">
+                    <span class="nav-icon"><i class="fas fa-microscope"></i></span>静态分析与工具链
+                    <span class="nav-badge current">当前</span>
+                </a></li>
+                <li><a href="pest-testing.html">
+                    <span class="nav-icon"><i class="fas fa-flask-vial"></i></span>Pest 测试框架
+                    <span class="nav-badge upcoming">下一</span>
+                </a></li>
+                <li><a href="git-workflow.html">
+                    <span class="nav-icon"><i class="fab fa-git-alt"></i></span>Git 工作流
+                    <span class="nav-badge upcoming"></span>
+                </a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">2</span>
+                <span class="phase-label">架构设计升级</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-layer-group"></i></span>三层架构</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-diagram-project"></i></span>依赖注入</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">3</span>
+                <span class="phase-label">性能优化</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-database"></i></span>N+1 查询</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-bolt"></i></span>缓存策略</a></li>
+            </ul>
+
+            <div class="phase-divider">
+                <span class="phase-num" style="background:rgba(255,255,255,0.08);color:var(--text-muted)">4</span>
+                <span class="phase-label">测试体系</span>
+                <span class="phase-line"></span>
+            </div>
+            <h4 style="opacity:0.4">待开放</h4>
+            <ul class="sidebar-nav" style="opacity:0.35;pointer-events:none">
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-vial"></i></span>CI/CD</a></li>
+                <li><a href="#"><span class="nav-icon"><i class="fas fa-chart-line"></i></span>覆盖率</a></li>
+            </ul>
+        </aside>
+
+        <!-- 正文 -->
+        <main class="content">
+            <!-- 文章头部 -->
+            <div class="page-header">
+                <div class="breadcrumb">
+                    <a href="../index.html">首页</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <a href="../index.html#phases">第一阶段：代码质量基础</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.6rem"></i>
+                    <span>静态分析与工具链</span>
+                </div>
+                <h1>静态分析与工具链</h1>
+                <p class="page-desc">让工具代替人眼检查代码质量——Laravel Pint 格式化、PHPStan Level 9 静态分析、Larastan、PHP CodeSniffer 的完整配置指南。</p>
+                <div class="page-meta">
+                    <span><i class="far fa-clock"></i> 阅读约 25 分钟</span>
+                    <span><i class="far fa-bookmark"></i> 第一阶段 · 主题 2/4</span>
+                    <span class="tag tag-indigo">工具链</span>
+                </div>
+            </div>
+
+            <!-- 目录 -->
+            <div class="toc-box">
+                <h3 style="font-size:1rem;font-weight:600;margin-bottom:0.75rem"><i class="fas fa-list-ul" style="color:#a5b4fc;margin-right:0.5rem"></i>本文目录</h3>
+                <ol>
+                    <li><a href="#overview">工具链全景图</a></li>
+                    <li><a href="#pint">Laravel Pint — 代码格式化</a></li>
+                    <li><a href="#phpstan">PHPStan — 静态分析</a></li>
+                    <li><a href="#larastan">Larastan — Laravel 专用分析</a></li>
+                    <li><a href="#phpcs">PHP CodeSniffer — PSR-12 检查</a></li>
+                    <li><a href="#ide">IDE 集成与开发体验</a></li>
+                    <li><a href="#ci">CI 集成方案</a></li>
+                    <li><a href="#composer-scripts">Composer Scripts 统一管理</a></li>
+                    <li><a href="#troubleshooting">常见问题排查</a></li>
+                </ol>
+            </div>
+
+            <!-- ====== Section 1 ====== -->
+            <h2 class="section-title" id="overview">工具链全景图</h2>
+            <p>代码质量工具链分为三层：<strong style="color:#e0e7ff">格式化</strong>（让代码看起来一样）、<strong style="color:#e0e7ff">静态分析</strong>（在运行前发现错误）、<strong style="color:#e0e7ff">测试</strong>（验证行为正确）。本页聚焦前两层。</p>
+
+            <div class="tool-card">
+                <div class="tool-icon" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff"><i class="fas fa-paintbrush"></i></div>
+                <div class="tool-info">
+                    <h4>Laravel Pint</h4>
+                    <p>自动代码格式化工具，基于 PHP-CS-Fixer，零配置即可使用</p>
+                </div>
+                <span class="tag tag-violet">格式化</span>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon" style="background:linear-gradient(135deg,#f43f5e,#e11d48);color:#fff"><i class="fas fa-microscope"></i></div>
+                <div class="tool-info">
+                    <h4>PHPStan Level 9</h4>
+                    <p>最严格的 PHP 静态分析器，在不运行代码的情况下发现类型错误和 bug</p>
+                </div>
+                <span class="tag tag-rose">静态分析</span>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff"><i class="fab fa-laravel"></i></div>
+                <div class="tool-info">
+                    <h4>Larastan</h4>
+                    <p>基于 PHPStan 的 Laravel 扩展，理解 Eloquent、Facade、Container 等框架特性</p>
+                </div>
+                <span class="tag tag-amber">Laravel 专用</span>
+            </div>
+            <div class="tool-card">
+                <div class="tool-icon" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff"><i class="fas fa-search"></i></div>
+                <div class="tool-info">
+                    <h4>PHP CodeSniffer</h4>
+                    <p>PSR-12 标准检查工具，可作为 CI 中格式合规性的最后防线</p>
+                </div>
+                <span class="tag tag-emerald">标准检查</span>
+            </div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> 协作方式</div>
+                <p><strong style="color:#e0e7ff">Pint</strong> 负责自动修复 → <strong style="color:#e0e7ff">PHPStan</strong> 负责发现逻辑错误 → <strong style="color:#e0e7ff">Pest</strong> 负责验证行为。三者互补，缺一不可。</p>
+            </div>
+
+            <!-- ====== Section 2 ====== -->
+            <h2 class="section-title" id="pint">Laravel Pint — 代码格式化</h2>
+
+            <h3 class="subsection-title">2.1 安装</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code>composer require --dev laravel/pint</code></div>
+
+            <h3 class="subsection-title">2.2 即开即用</h3>
+            <p>Pint 内置 Laravel 预设，零配置即可使用。核心命令：</p>
+            <table class="comparison-table">
+                <thead><tr><th>命令</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td><code>./vendor/bin/pint</code></td><td>扫描并自动修复所有文件</td></tr>
+                    <tr><td><code>./vendor/bin/pint --test</code></td><td>只检查，不修改文件（CI 模式）</td></tr>
+                    <tr><td><code>./vendor/bin/pint app/Models</code></td><td>只处理指定目录</td></tr>
+                    <tr><td><code>./vendor/bin/pint --dirty</code></td><td>只处理 Git 变更的文件</td></tr>
+                    <tr><td><code>./vendor/bin/pint -v</code></td><td>显示详细输出</td></tr>
+                    <tr><td><code>./vendor/bin/pint files/*.php</code></td><td>处理指定文件</td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">2.3 自定义规则 — pint.json</h3>
+            <p>项目根目录创建 <code>pint.json</code>，在 Laravel 预设基础上增加团队规则：</p>
+            <div class="code-block p-4"><span class="code-label">pint.json</span><code>{
+    <span style="color:#34d399">"preset"</span>: <span style="color:#34d399">"laravel"</span>,
+    <span style="color:#34d399">"rules"</span>: {
+        <span style="color:#34d399">"strict_comparison"</span>: true,
+        <span style="color:#34d399">"explicit_string_variable"</span>: true,
+        <span style="color:#34d399">"fully_qualified_strict_types"</span>: true,
+        <span style="color:#34d399">"no_superfluous_phpdoc_tags"</span>: { <span style="color:#34d399">"allow_mixed"</span>: true },
+        <span style="color:#34d399">"ordered_imports"</span>: {
+            <span style="color:#34d399">"sort_algorithm"</span>: <span style="color:#34d399">"alpha"</span>,
+            <span style="color:#34d399">"imports_order"</span>: [<span style="color:#34d399">"const"</span>, <span style="color:#34d399">"class"</span>, <span style="color:#34d399">"function"</span>]
+        },
+        <span style="color:#34d399">"single_line_after_imports"</span>: true,
+        <span style="color:#34d399">"trailing_comma_in_multiline"</span>: true,
+        <span style="color:#34d399">"native_function_invocation"</span>: { <span style="color:#34d399">"include"</span>: [<span style="color:#34d399">"@all"</span>] },
+        <span style="color:#34d399">"declare_strict_types"</span>: true,
+        <span style="color:#34d399">"blank_line_after_opening_tag"</span>: true
+    },
+    <span style="color:#34d399">"exclude"</span>: [<span style="color:#34d399">"vendor"</span>, <span style="color:#34d399">"storage"</span>, <span style="color:#34d399">"bootstrap/cache"</span>]
+}</code></div>
+
+            <h3 class="subsection-title">2.4 修复效果示例</h3>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 修复前</span>
+                    <div class="code-block p-4"><code>&lt;?php
+<span style="color:#c084fc">use</span> App\Models\Order;
+<span style="color:#c084fc">use</span> Illuminate\Support\Collection;
+
+<span style="color:#c084fc">class</span> <span style="color:#67e8f9">OrderService</span>
+{
+<span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getActive</span>($status){
+    <span style="color:#c084fc">if</span>($status==<span style="color:#34d399">'active'</span>){
+        <span style="color:#c084fc">return</span> Order::where(<span style="color:#34d399">'status'</span>,
+            $status)->get();
+    }
+}
+}</code></div>
+                </div>
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 修复后</span>
+                    <div class="code-block p-4"><code>&lt;?php
+
+<span style="color:#c084fc">declare</span>(strict_types=1);
+
+<span style="color:#c084fc">use</span> App\Models\Order;
+<span style="color:#c084fc">use</span> Illuminate\Support\Collection;
+
+<span style="color:#c084fc">class</span> <span style="color:#67e8f9">OrderService</span>
+{
+    <span style="color:#c084fc">public function</span> <span style="color:#67e8f9">getActive</span>(<span style="color:#a78bafa">string</span> $status): Collection
+    {
+        <span style="color:#c084fc">if</span> ($status === <span style="color:#34d399">'active'</span>) {
+            <span style="color:#c084fc">return</span> Order::where(<span style="color:#34d399">'status'</span>, $status)->get();
+        }
+    }
+}</code></div>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">2.5 Pre-commit 集成</h3>
+            <p>在提交代码前自动运行 Pint，防止不规范的代码进入仓库：</p>
+            <div class="code-block p-4"><span class="code-label">.git/hooks/pre-commit</span><code>#!/bin/sh
+<span style="color:#6b7280"># 只检查 Git 暂存区的 PHP 文件</span>
+./vendor/bin/pint --dirty
+
+<span style="color:#c084fc">if</span> [ $? -ne 0 ]; <span style="color:#c084fc">then</span>
+    <span style="color:#c084fc">echo</span> <span style="color:#34d399">"\n❌ Pint 发现格式问题，已自动修复。请重新 git add 并提交。"</span>
+    <span style="color:#c084fc">exit</span> 1
+<span style="color:#c084fc">fi</span></code></div>
+
+            <!-- ====== Section 3 ====== -->
+            <h2 class="section-title" id="phpstan">PHPStan — 静态分析</h2>
+
+            <h3 class="subsection-title">3.1 什么是 PHPStan</h3>
+            <p>PHPStan 在<strong style="color:#e0e7ff">不运行代码</strong>的情况下，通过分析类型推断来发现 bug。它能捕获以下问题：</p>
+            <ul>
+                <li>类型不匹配（传了 <code>string</code> 给期望 <code>int</code> 的参数）</li>
+                <li>未定义的属性和方法调用</li>
+                <li>可能为 <code>null</code> 的值未检查</li>
+                <li>死代码（永远不会执行的分支）</li>
+                <li>返回值类型与声明不符</li>
+            </ul>
+
+            <h3 class="subsection-title">3.2 Level 等级</h3>
+            <p>PHPStan 有 0-9 共 10 个级别。<strong style="color:#e0e7ff">团队目标：Level 9（最严格）</strong>。</p>
+            <div class="level-grid">
+                <div class="level-item" style="background:rgba(16,185,129,0.06);border-color:rgba(16,185,129,0.2)">
+                    <div class="level-num" style="color:#34d399">0-4</div>
+                    <div class="level-label">基础类型检查<br>发现基本的类型错误</div>
+                </div>
+                <div class="level-item" style="background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.2)">
+                    <div class="level-num" style="color:#fbbf24">5-7</div>
+                    <div class="level-label">严格模式<br>检查更复杂的类型推断</div>
+                </div>
+                <div class="level-item" style="background:rgba(239,68,68,0.06);border-color:rgba(239,68,68,0.2)">
+                    <div class="level-num" style="color:#f87171">8-9</div>
+                    <div class="level-label">最严格<br>团队目标 Level 9</div>
+                </div>
+            </div>
+
+            <div class="tip-card tip">
+                <div class="tip-label"><i class="fas fa-lightbulb"></i> 渐进式策略</div>
+                <p>如果现有代码无法一步到位 Level 9，建议分阶段提升：<br>
+                <strong style="color:#e0e7ff">第 1 周</strong>：先到 Level 5 → <strong style="color:#e0e7ff">第 2 周</strong>：到 Level 7 → <strong style="color:#e0e7ff">第 3 周</strong>：到 Level 9<br>
+                使用 <code>--level=5</code> 逐步加严，不要一次跳太猛。</p>
+            </div>
+
+            <h3 class="subsection-title">3.3 安装与配置</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code>composer require --dev phpstan/phpstan</code></div>
+
+            <p>在项目根目录创建 <code>phpstan.neon</code>：</p>
+            <div class="code-block p-4"><span class="code-label">phpstan.neon</span><code><span style="color:#a78bafa">parameters</span>:
+    <span style="color:#a78bafa">level</span>: <span style="color:#c084fc">9</span>
+    <span style="color:#a78bafa">paths</span>:
+        - <span style="color:#34d399">app</span>
+        - <span style="color:#34d399">config</span>
+        - <span style="color:#34d399">database</span>
+        - <span style="color:#34d399">routes</span>
+    <span style="color:#a78bafa">bootstrapFiles</span>:
+        - <span style="color:#34d399">vendor/autoload.php</span>
+    <span style="color:#a78bafa">excludePaths</span>:
+        - <span style="color:#34d399">vendor</span>
+        - <span style="color:#34d399">storage</span>
+        - <span style="color:#34d399">bootstrap/cache</span>
+        - <span style="color:#34d399">database/migrations/*_create_*_table.php</span>
+    <span style="color:#a78bafa">checkMissingIterableValueType</span>: <span style="color:#c084fc">false</span>
+    <span style="color:#a78bafa">treatPhpDocTypesAsCertain</span>: <span style="color:#c084fc">true</span>
+    <span style="color:#a78bafa">reportUnmatchedIgnoredErrors</span>: <span style="color:#c084fc">false</span>
+    <span style="color:#a78bafa">ignoreErrors</span>:
+        - <span style="color:#34d399">message</span>: <span style="color:#34d399">"#^Call to an undefined method Illuminate\\Support\\HigherOrderTapProxy</span>
+        - <span style="color:#34d399">message</span>: <span style="color:#34d399">"#^Access to an undefined property</span></code></div>
+
+            <h3 class="subsection-title">3.4 常用命令</h3>
+            <table class="comparison-table">
+                <thead><tr><th>命令</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td><code>./vendor/bin/phpstan analyse</code></td><td>使用 phpstan.neon 配置运行分析</td></tr>
+                    <tr><td><code>./vendor/bin/phpstan analyse --level=5</code></td><td>临时使用 Level 5 运行</td></tr>
+                    <tr><td><code>./vendor/bin/phpstan analyse app/Services</code></td><td>只分析指定目录</td></tr>
+                    <tr><td><code>./vendor/bin/phpstan analyse --error-format=github</code></td><td>GitHub Actions 格式输出</td></tr>
+                    <tr><td><code>./vendor/bin/phpstan analyse --memory-limit=512M</code></td><td>增大内存限制</td></tr>
+                    <tr><td><code>./vendor/bin/phpstan clear-result-cache</code></td><td>清除缓存（修改配置后）</td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">3.5 典型错误修复</h3>
+            <p>以下是 PHPStan Level 9 最常报告的问题及修复方法：</p>
+
+            <h4 style="font-size:0.95rem;color:#e0e7ff;margin:1.5rem 0 0.75rem">问题 1：未检查 null</h4>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> PHPStan 报错</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">function</span> <span style="color:#67e8f9">getUser</span>(<span style="color:#a78bafa">int</span> $id): <span style="color:#a78bafa">User</span>
+{
+    <span style="color:#c084fc">return</span> User::findOrFail($id);
+}
+
+$user = <span style="color:#67e8f9">getUser</span>(1);
+<span style="color:#c084fc">echo</span> $user->name;
+<span style="color:#6b7280">// ⚠️ findOrFail 可能抛异常</span></code></div>
+                </div>
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 修复后</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">function</span> <span style="color:#67e8f9">getUser</span>(<span style="color:#a78bafa">int</span> $id): <span style="color:#a78bafa">User</span>
+{
+    <span style="color:#c084fc">return</span> User::findOrFail($id);
+}
+
+<span style="color:#c084fc">echo</span> <span style="color:#67e8f9">getUser</span>(1)->name;
+<span style="color:#6b7280">// ✅ 链式调用，类型明确</span></code></div>
+                </div>
+            </div>
+
+            <h4 style="font-size:0.95rem;color:#e0e7ff;margin:1.5rem 0 0.75rem">问题 2：数组键可能不存在</h4>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> PHPStan 报错</span>
+                    <div class="code-block p-4"><code>$data = $request->all();
+$name = $data[<span style="color:#34d399">'name'</span>];
+<span style="color:#6b7280">// ⚠️ Offset 'name' might not exist</span></code></div>
+                </div>
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 修复后</span>
+                    <div class="code-block p-4"><code>$name = $request-><span style="color:#67e8f9">input</span>(<span style="color:#34d399">'name'</span>);
+<span style="color:#6b7280">// ✅ 使用 FormRequest 方法</span>
+
+<span style="color:#c084fc">if</span> ($request-><span style="color:#67e8f9">has</span>(<span style="color:#34d399">'name'</span>)) {
+    $name = $request-><span style="color:#67e8f9">string</span>(<span style="color:#34d399">'name'</span>);
+}
+<span style="color:#6b7280">// ✅ 显式检查后使用</span></code></div>
+                </div>
+            </div>
+
+            <h4 style="font-size:0.95rem;color:#e0e7ff;margin:1.5rem 0 0.75rem">问题 3：严格比较</h4>
+            <div class="dual-code">
+                <div>
+                    <span class="good-label red"><i class="fas fa-xmark"></i> 报错</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">if</span> ($status == <span style="color:#34d399">'active'</span>) { ... }
+<span style="color:#6b7280">// ⚠️ == 可能发生类型转换</span></code></div>
+                </div>
+                <div>
+                    <span class="good-label green"><i class="fas fa-check"></i> 修复后</span>
+                    <div class="code-block p-4"><code><span style="color:#c084fc">if</span> ($status === <span style="color:#34d399">'active'</span>) { ... }
+<span style="color:#6b7280">// ✅ 始终使用 === 严格比较</span></code></div>
+                </div>
+            </div>
+
+            <!-- ====== Section 4 ====== -->
+            <h2 class="section-title" id="larastan">Larastan — Laravel 专用分析</h2>
+
+            <h3 class="subsection-title">4.1 为什么需要 Larastan</h3>
+            <p>原生 PHPStan 不理解 Laravel 的魔法——Facade、Eloquent 魔术方法、依赖注入容器等。Larastan 为这些特性添加了类型支持：</p>
+
+            <table class="comparison-table">
+                <thead><tr><th>Laravel 特性</th><th>PHPStan 行为</th><th>Larastan 行为</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Auth::user()</code></td><td>❌ 报错：静态方法不存在</td><td>✅ 返回 <code>?User</code></td></tr>
+                    <tr><td><code>User::where('active', true)->get()</code></td><td>❌ 找不到 <code>where()</code></td><td>✅ 返回 <code>Builder</code></td></tr>
+                    <tr><td><code>$user->orders</code></td><td>❌ 属性不存在</td><td>✅ 返回 <code>Collection&lt;Order&gt;</code></td></tr>
+                    <tr><td><code>app(SomeService::class)</code></td><td>❌ 类型推断失败</td><td>✅ 返回容器解析类型</td></tr>
+                    <tr><td><code>View::make('view')</code></td><td>❌ 不认识</td><td>✅ 返回 <code>View</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">4.2 安装与配置</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># Larastan 会自动安装 PHPStan 作为依赖</span>
+composer require --dev nunomaduro/larastan</code></div>
+
+            <p>更新 <code>phpstan.neon</code>，引入 Laravel 扩展：</p>
+            <div class="code-block p-4"><span class="code-label">phpstan.neon（完整版）</span><code><span style="color:#c084fc">includes</span>:
+    - <span style="color:#34d399">vendor/nunomaduro/larastan/extension.neon</span>
+
+<span style="color:#a78bafa">parameters</span>:
+    <span style="color:#a78bafa">level</span>: <span style="color:#c084fc">9</span>
+    <span style="color:#a78bafa">paths</span>:
+        - <span style="color:#34d399">app</span>
+        - <span style="color:#34d399">config</span>
+        - <span style="color:#34d399">database</span>
+        - <span style="color:#34d399">routes</span>
+    <span style="color:#a78bafa">bootstrapFiles</span>:
+        - <span style="color:#34d399">vendor/autoload.php</span>
+    <span style="color:#a78bafa">excludePaths</span>:
+        - <span style="color:#34d399">vendor</span>
+        - <span style="color:#34d399">storage</span>
+        - <span style="color:#34d399">bootstrap/cache</span>
+    <span style="color:#a78bafa">checkMissingIterableValueType</span>: <span style="color:#c084fc">false</span>
+    <span style="color:#a78bafa">checkGenericClassInNonGenericObjectType</span>: <span style="color:#c084fc">false</span>
+    <span style="color:#a78bafa">treatPhpDocTypesAsCertain</span>: <span style="color:#c084fc">true</span>
+    <span style="color:#a78bafa">reportUnmatchedIgnoredErrors</span>: <span style="color:#c084fc">false</span>
+    <span style="color:#a78bafa">ignoreErrors</span>:
+        - <span style="color:#34d399">message</span>: <span style="color:#34d399">"#^Call to an undefined method.*Builder</span>
+        - <span style="color:#34d399">message</span>: <span style="color:#34d399">"#^Access to an undefined property</span></code></div>
+
+            <h3 class="subsection-title">4.3 Model 增强类型</h3>
+            <p>为 Eloquent Model 添加属性类型，让 Larastan 理解你的数据库结构：</p>
+            <div class="code-block p-4"><span class="code-label">app/Models/User.php</span><code><span style="color:#c084fc">class</span> <span style="color:#67e8f9">User</span> <span style="color:#c084fc">extends</span> Authenticatable
+{
+    <span style="color:#c084fc">protected</span> $fillable = [<span style="color:#34d399">'name'</span>, <span style="color:#34d399">'email'</span>, <span style="color:#34d399">'password'</span>];
+
+    <span style="color:#c084fc">protected</span> $casts = [
+        <span style="color:#34d399">'email_verified_at'</span> => <span style="color:#34d399">'datetime'</span>,
+        <span style="color:#34d399">'password'</span> => <span style="color:#34d399">'hashed'</span>,
+        <span style="color:#34d399">'is_active'</span> => <span style="color:#34d399">'boolean'</span>,
+        <span style="color:#34d399">'settings'</span> => <span style="color:#34d399">'array'</span>,
+    ];
+
+    <span style="color:#6b7280">/** @return HasMany&lt;Order&gt; */</span>
+    <span style="color:#c084fc">public function</span> <span style="color:#67e8f9">orders</span>(): HasMany
+    {
+        <span style="color:#c084fc">return</span> $this-><span style="color:#67e8f9">hasMany</span>(Order::class);
+    }
+}</code></div>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> Pro Tip</div>
+                <p>使用 <code>php artisan ide-helper:generate</code> 自动生成 IDE 辅助文件和完整的类型提示。配合 <code>barryvdh/laravel-ide-helper</code> 包使用效果更佳。</p>
+            </div>
+
+            <!-- ====== Section 5 ====== -->
+            <h2 class="section-title" id="phpcs">PHP CodeSniffer — PSR-12 检查</h2>
+
+            <h3 class="subsection-title">5.1 定位</h3>
+            <p>CodeSniffer 与 Pint 的区别：<strong style="color:#e0e7ff">Pint = 修复工具</strong>，<strong style="color:#e0e7ff">CodeSniffer = 检查工具</strong>。CodeSniffer 不修改代码，只报告不符合规范的地方，适合作为 CI 中的最后防线。</p>
+
+            <h3 class="subsection-title">5.2 安装</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># 安装 CodeSniffer</span>
+composer require --dev squizlabs/php_codesniffer
+
+<span style="color:#6b7280"># 注册编码标准</span>
+./vendor/bin/phpcs --config-set installed_paths vendor/phpcompatibility/php-compatibility</code></div>
+
+            <h3 class="subsection-title">5.3 使用命令</h3>
+            <table class="comparison-table">
+                <thead><tr><th>命令</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td><code>./vendor/bin/phpcs --standard=PSR12 app/</code></td><td>检查 app 目录是否符合 PSR-12</td></tr>
+                    <tr><td><code>./vendor/bin/phpcbf --standard=PSR12 app/</code></td><td>自动修复 PSR-12 问题</td></tr>
+                    <tr><td><code>./vendor/bin/phpcs -n app/</code></td><td>只显示错误，不显示警告</td></tr>
+                    <tr><td><code>./vendor/bin/phpcs --report=summary app/</code></td><td>摘要报告格式</td></tr>
+                </tbody>
+            </table>
+
+            <h3 class="subsection-title">5.4 创建自定义规则集</h3>
+            <div class="code-block p-4"><span class="code-label">phpcs.xml.dist</span><code>&lt;?xml version=<span style="color:#34d399">"1.0"</span>?&gt;
+&lt;ruleset name=<span style="color:#34d399">"LaravelTeam"</span>&gt;
+    &lt;rule ref=<span style="color:#34d399">"PSR12"</span>/&gt;
+    &lt;file&gt;app/&lt;/file&gt;
+    &lt;file&gt;config/&lt;/file&gt;
+    &lt;file&gt;database/&lt;/file&gt;
+    &lt;file&gt;routes/&lt;/file&gt;
+    &lt;exclude-pattern&gt;vendor/&lt;/exclude-pattern&gt;
+    &lt;exclude-pattern&gt;storage/&lt;/exclude-pattern&gt;
+    &lt;exclude-pattern&gt;bootstrap/cache/&lt;/exclude-pattern&gt;
+    &lt;rule ref=<span style="color:#34d399">"Generic.PHP.DisallowShortOpenTag.EchoFound"</span>/&gt;
+    &lt;rule ref=<span style="color:#34d399">"Generic.Arrays.DisallowLongArraySyntax.Found"</span>/&gt;
+    &lt;property name=<span style="color:#34d399">"lineLimit"</span> value=<span style="color:#34d399">"120"</span>/&gt;
+    &lt;property name=<span style="color:#34d399">"absoluteLineLimit"</span> value=<span style="color:#34d399">"150"</span>/&gt;
+&lt;/ruleset&gt;</code></div>
+
+            <!-- ====== Section 6 ====== -->
+            <h2 class="section-title" id="ide">IDE 集成与开发体验</h2>
+
+            <h3 class="subsection-title">6.1 PhpStorm 配置</h3>
+            <ol>
+                <li><strong style="color:#e0e7ff">安装插件</strong> — 设置 → 插件 → 搜索 "PHPStan" 安装</li>
+                <li><strong style="color:#e0e7ff">配置路径</strong> — 设置 → PHP → Quality Tools → PHPStan → 路径指向 <code>vendor/bin/phpstan</code></li>
+                <li><strong style="color:#e0e7ff">自动分析</strong> — 勾选 "Run on every save"，保存文件时自动检查</li>
+                <li><strong style="color:#e0e7ff">Real-time</strong> — 代码编写时实时在编辑器中高亮显示错误</li>
+            </ol>
+
+            <h3 class="subsection-title">6.2 VS Code 配置</h3>
+            <div class="code-block p-4"><span class="code-label">.vscode/settings.json</span><code>{
+    <span style="color:#34d399">"phpstan.enabled"</span>: true,
+    <span style="color:#34d399">"phpstan.config"</span>: <span style="color:#34d399">"./phpstan.neon"</span>,
+    <span style="color:#34d399">"editor.formatOnSave"</span>: true,
+    <span style="color:#34d399">"[php]"</span>: {
+        <span style="color:#34d399">"editor.defaultFormatter"</span>: <span style="color:#34d399">"open-southeners.laravel-pint"</span>
+    },
+    <span style="color:#34d399">"laravel-pint.env"</span>: {
+        <span style="color:#34d399">"APP_ENV"</span>: <span style="color:#34d399">"testing"</span>
+    }
+}</code></div>
+            <p>需要安装的 VS Code 扩展：</p>
+            <ul>
+                <li><strong style="color:#e0e7ff">Laravel Pint</strong>（<code>open-southeners.laravel-pint</code>）— 保存时自动格式化</li>
+                <li><strong style="color:#e0e7ff">PHP Intelephense</strong>（<code>bmewburn.vscode-intelephense-client</code>）— 智能补全和跳转</li>
+                <li><strong style="color:#e0e7ff">PHPStan</strong>（<code>calebporzio.better-phpstan</code>）— 实时静态分析</li>
+            </ul>
+
+            <h3 class="subsection-title">6.3 IDE Helper 增强</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code>composer require --dev barryvdh/laravel-ide-helper
+
+php artisan ide-helper:generate    <span style="color:#6b7280"># 生成 IDE 辅助文件</span>
+php artisan ide-helper:models      <span style="color:#6b7280"># Model 属性补全</span>
+php artisan ide-helper:meta        <span style="color:#6b7280"># Facade 类型支持</span></code></div>
+
+            <div class="tip-card warn">
+                <div class="tip-label"><i class="fas fa-exclamation-triangle"></i> 注意</div>
+                <p>IDE Helper 生成的文件（<code>_ide_helper.php</code>、<code>.phpstorm.meta.php</code>）应加入 <code>.gitignore</code>，不要提交到仓库。</p>
+            </div>
+
+            <!-- ====== Section 7 ====== -->
+            <h2 class="section-title" id="ci">CI 集成方案</h2>
+
+            <h3 class="subsection-title">7.1 GitHub Actions 配置</h3>
+            <div class="code-block p-4"><span class="code-label">.github/workflows/quality.yml</span><code><span style="color:#34d399">name</span>: Quality Check
+
+<span style="color:#34d399">on</span>:
+  <span style="color:#34d399">push</span>:
+    <span style="color:#34d399">branches</span>: [<span style="color:#34d399">main</span>, <span style="color:#34d399">develop</span>]
+  <span style="color:#34d399">pull_request</span>:
+    <span style="color:#34d399">branches</span>: [<span style="color:#34d399">main</span>]
+
+<span style="color:#34d399">jobs</span>:
+  <span style="color:#34d399">quality</span>:
+    <span style="color:#34d399">runs-on</span>: ubuntu-latest
+    <span style="color:#34d399">strategy</span>:
+      <span style="color:#34d399">fail-fast</span>: true
+
+    <span style="color:#34d399">steps</span>:
+      - <span style="color:#34d399">uses</span>: actions/checkout@v4
+
+      - <span style="color:#34d399">name</span>: Setup PHP 8.3
+        <span style="color:#34d399">uses</span>: shivammathur/setup-php@v2
+        <span style="color:#34d399">with</span>:
+          <span style="color:#34d399">php-version</span>: <span style="color:#34d399">'8.3'</span>
+          <span style="color:#34d399">extensions</span>: mbstring, xml, ctype, iconv, intl
+
+      - <span style="color:#34d399">name</span>: Install Dependencies
+        <span style="color:#34d399">run</span>: composer install --prefer-dist --no-progress
+
+      - <span style="color:#34d399">name</span>: Laravel Pint (Format Check)
+        <span style="color:#34d399">run</span>: ./vendor/bin/pint --test
+
+      - <span style="color:#34d399">name</span>: PHPStan Analyse
+        <span style="color:#34d399">run</span>: ./vendor/bin/phpstan analyse --error-format=github
+
+      - <span style="color:#34d399">name</span>: Run Tests
+        <span style="color:#34d399">run</span>: php artisan test --parallel</code></div>
+
+            <div class="tip-card good">
+                <div class="tip-label"><i class="fas fa-check-circle"></i> CI 检查流程</div>
+                <p>每次 Push 或 PR 自动运行：<strong style="color:#e0e7ff">Pint 格式检查</strong> → <strong style="color:#e0e7ff">PHPStan Level 9</strong> → <strong style="color:#e0e7ff">Pest 测试套件</strong>。任何一步失败都会阻止合并。</p>
+            </div>
+
+            <!-- ====== Section 8 ====== -->
+            <h2 class="section-title" id="composer-scripts">Composer Scripts 统一管理</h2>
+            <p>将所有工具命令统一到 <code>composer.json</code> 的 <code>scripts</code> 中，团队成员只需记住 <code>composer xxx</code>：</p>
+            <div class="code-block p-4"><span class="code-label">composer.json（scripts 部分）</span><code>{
+    <span style="color:#34d399">"scripts"</span>: {
+        <span style="color:#6b7280">// ========== 格式化 ==========</span>
+        <span style="color:#34d399">"pint"</span>:        <span style="color:#34d399">"./vendor/bin/pint"</span>,
+        <span style="color:#34d399">"pint:test"</span>:   <span style="color:#34d399">"./vendor/bin/pint --test"</span>,
+        <span style="color:#34d399">"pint:dirty"</span>:  <span style="color:#34d399">"./vendor/bin/pint --dirty"</span>,
+
+        <span style="color:#6b7280">// ========== 静态分析 ==========</span>
+        <span style="color:#34d399">"stan"</span>:        <span style="color:#34d399">"./vendor/bin/phpstan analyse"</span>,
+        <span style="color:#34d399">"stan:5"</span>:      <span style="color:#34d399">"./vendor/bin/phpstan analyse --level=5"</span>,
+        <span style="color:#34d399">"stan:7"</span>:      <span style="color:#34d399">"./vendor/bin/phpstan analyse --level=7"</span>,
+
+        <span style="color:#6b7280">// ========== 测试 ==========</span>
+        <span style="color:#34d399">"test"</span>:              <span style="color:#34d399">"php artisan test"</span>,
+        <span style="color:#34d399">"test:coverage"</span>:     <span style="color:#34d399">"php artisan test --coverage"</span>,
+        <span style="color:#34d399">"test:parallel"</span>:     <span style="color:#34d399">"php artisan test --parallel"</span>,
+
+        <span style="color:#6b7280">// ========== 综合检查 ==========</span>
+        <span style="color:#34d399">"check"</span>: [
+            <span style="color:#34d399">"@pint:test"</span>,
+            <span style="color:#34d399">"@stan"</span>,
+            <span style="color:#34d399">"@test"</span>
+        ],
+        <span style="color:#34d399">"check:fast"</span>: [
+            <span style="color:#34d399">"@pint:dirty"</span>,
+            <span style="color:#34d399">"@stan:5"</span>
+        ]
+    }
+}</code></div>
+
+            <table class="comparison-table">
+                <thead><tr><th>场景</th><th>命令</th><th>说明</th></tr></thead>
+                <tbody>
+                    <tr><td>日常开发</td><td><code>composer pint:dirty</code></td><td>只修复当前改动的文件，速度快</td></tr>
+                    <tr><td>提交前</td><td><code>composer check:fast</code></td><td>快速检查格式 + Level 5 分析</td></tr>
+                    <tr><td>PR 前完整检查</td><td><code>composer check</code></td><td>格式 + Level 9 分析 + 全部测试</td></tr>
+                    <tr><td>只运行测试</td><td><code>composer test</code></td><td>运行 Pest 测试套件</td></tr>
+                </tbody>
+            </table>
+
+            <!-- ====== Section 9 ====== -->
+            <h2 class="section-title" id="troubleshooting">常见问题排查</h2>
+
+            <h3 class="subsection-title">9.1 PHPStan 内存溢出</h3>
+            <div class="code-block p-4"><span class="code-label">Bash</span><code><span style="color:#6b7280"># 增大内存限制</span>
+./vendor/bin/phpstan analyse --memory-limit=1G
+
+<span style="color:#6b7280"># 清除缓存</span>
+./vendor/bin/phpstan clear-result-cache</code></div>
+
+            <h3 class="subsection-title">9.2 Laravel Facade 报错</h3>
+            <p>确保 <code>phpstan.neon</code> 包含了 Larastan 的 <code>extension.neon</code>，且配置了正确的 <code>bootstrapFiles</code>。</p>
+
+            <h3 class="subsection-title">9.3 Pint 与 PHPStan 冲突</h3>
+            <p>Pint 修改代码后可能引入 PHPStan 新问题。<strong style="color:#e0e7ff">正确顺序</strong>：先运行 Pint 修复格式，再运行 PHPStan 检查逻辑。</p>
+
+            <h3 class="subsection-title">9.4 暂时忽略特定错误</h3>
+            <div class="code-block p-4"><span class="code-label">行内忽略</span><code><span style="color:#c084fc">foreach</span> ($items <span style="color:#c084fc">as</span> $item) {
+    <span style="color:#c084fc">echo</span> $item[<span style="color:#34d399">'name'</span>]; <span style="color:#6b7280">// @phpstan-ignore-line</span>
+}
+
+<span style="color:#6b7280">// 忽略下一行</span>
+<span style="color:#6b7280">// @phpstan-ignore-next-line</span>
+<span style="color:#c084fc">echo</span> $undefined;</code></div>
+
+            <div class="tip-card warn">
+                <div class="tip-label"><i class="fas fa-exclamation-triangle"></i> 谨慎使用 @phpstan-ignore</div>
+                <p>每个 <code>@phpstan-ignore</code> 都应该是一个 TODO。定期审查这些忽略标记，真正的解决方式是修复代码而非忽略警告。设置 <code>reportUnmatchedIgnoredErrors: true</code> 可以发现已经不需要的忽略标记。</p>
+            </div>
+
+            <!-- 底部导航 -->
+            <div class="page-nav">
+                <a href="psr12-code-standards.html">
+                    <span class="nav-dir"><i class="fas fa-arrow-left"></i> 上一篇</span>
+                    <span class="nav-title">PSR-12 代码规范</span>
+                </a>
+                <a href="pest-testing.html" class="next">
+                    <span class="nav-dir">下一篇 <i class="fas fa-arrow-right"></i></span>
+                    <span class="nav-title">Pest 测试框架</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/common.js"></script>
+</body>
+</html>
